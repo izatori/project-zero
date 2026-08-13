@@ -1,6 +1,9 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">ProjectZero</a>
+        <a class="navbar-brand" href="">
+            <span class="bi bi-razor-nav-menu brand-icon" aria-hidden="true"></span>
+            <span class="brand-text">Project<span class="brand-zero">Zero</span></span>
+        </a>
     </div>
 </div>
 
@@ -15,15 +18,48 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="razor-syntax">
+                <span class="bi bi-razor-nav-menu-light" aria-hidden="true"></span> Razor Syntax
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <NavLink class="nav-link" href="razor-components">
+                <span class="bi bi-boxes" aria-hidden="true"></span> Razor Components
             </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="bootstrap-comparison">
+                <span class="bi bi-bootstrap" aria-hidden="true"></span> Bootstrap vs Plain
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="bootstrap-components">
+                <span class="bi bi-bootstrap-fill" aria-hidden="true"></span> Bootstrap Components
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <div class="d-flex align-items-center">
+                <NavLink class="nav-link playground-link" href="playground">
+                    <span class="bi bi-terminal" aria-hidden="true"></span> Playground
+                </NavLink>
+                <button class="nav-sublink-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#playgroundSubs" aria-expanded="false" aria-controls="playgroundSubs"
+                        title="Toggle Playground sub-links">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="collapse" id="playgroundSubs">
+                <NavLink class="nav-link sub" href="counter">
+                    <span class="bi bi-plus-square" aria-hidden="true"></span> Counter
+                </NavLink>
+                <NavLink class="nav-link sub" href="weather">
+                    <span class="bi bi-cloud-sun" aria-hidden="true"></span> Weather
+                </NavLink>
+            </div>
         </div>
     </nav>
 </div>

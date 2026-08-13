@@ -1,0 +1,180 @@
+@page "/razor-components"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Razor Components</PageTitle>
+
+<h1>Razor components</h1>
+
+<p class="lead">
+    "Tags" in a <code>.razor</code> file are either ordinary HTML elements, built-in Blazor components,
+    or your own components. This page shows how each works.
+</p>
+
+<hr/>
+
+<h2>1. Any HTML tag is valid</h2>
+
+<p>Razor is a superset of HTML. Every HTML element works exactly as you expect:</p>
+
+<pre><code>&lt;div&gt;, &lt;span&gt;, &lt;p&gt;, &lt;h1&gt;, &lt;table&gt;, &lt;ul&gt;, &lt;input&gt;, &lt;select&gt;, &lt;form&gt;, ...</code></pre>
+
+<p>The only additions are the <code>@@</code>-prefixed Razor attributes (<code>@@onclick</code>, <code>@@bind</code>, ...)
+    and the component tags from sections 2-4 below.</p>
+
+<h2>2. Built-in Blazor components</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Component</th>
+        <th>Purpose</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td><code>&lt;PageTitle&gt;</code></td><td>Sets the browser tab title.</td></tr>
+    <tr><td><code>&lt;HeadOutlet&gt;</code></td><td>Renders <code>PageTitle</code>/<code>HeadContent</code> (in <code>App.razor</code>).</td></tr>
+    <tr><td><code>&lt;NavLink&gt;</code></td><td>An <code>&lt;a&gt;</code> that knows when it matches the current route (adds <code>active</code>).</td></tr>
+    <tr><td><code>&lt;Router&gt;</code> / <code>&lt;RouteView&gt;</code></td><td>Route matching (see <code>Routes.razor</code>).</td></tr>
+    <tr><td><code>&lt;ErrorBoundary&gt;</code></td><td>Catches exceptions thrown by child content.</td></tr>
+    <tr><td><code>&lt;Virtualize&gt;</code></td><td>Renders only the visible rows of a large list.</td></tr>
+    <tr><td><code>&lt;EditForm&gt;</code>, <code>&lt;InputText&gt;</code>, <code>&lt;InputNumber&gt;</code>, <code>&lt;ValidationMessage&gt;</code></td><td>Data-annotated form binding and validation.</td></tr>
+    <tr><td><code>&lt;FocusOnNavigate&gt;</code></td><td>Focuses an element after navigation (see <code>Routes.razor</code>).</td></tr>
+    <tr><td><code>&lt;AuthorizeView&gt;</code></td><td>Renders content conditionally by user (needs authentication configured).</td></tr>
+    </tbody>
+</table>
+
+<h3>NavLink example</h3>
+
+<nav class="nav nav-pills mb-4">
+    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Home</NavLink>
+    <NavLink class="nav-link" href="/counter">Counter</NavLink>
+    <NavLink class="nav-link" href="/weather">Weather</NavLink>
+    <NavLink class="nav-link" href="/razor-syntax">Razor Syntax</NavLink>
+</nav>
+
+<p>
+    <code>Match="NavLinkMatch.All"</code> matches only the exact URL;
+    the default (Prefix) matches the URL and everything under it.
+</p>
+
+<h2>3. Your own components: parameters</h2>
+
+<p>The component below is defined in <code>Components/Shared/PersonCard.razor</code>.
+    Values are passed through <code>[Parameter]</code> properties; the inner content is the special
+    <code>ChildContent</code> parameter.</p>
+
+<pre><code>&lt;PersonCard Name="Ada Lovelace" Age="36"&gt;
+    Wrote the first algorithm intended for a machine.
+&lt;/PersonCard&gt;</code></pre>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <PersonCard Name="Ada Lovelace" Age="36">Wrote the first algorithm for a machine.</PersonCard>
+    </div>
+    <div class="col-md-4">
+        <PersonCard Name="Grace Hopper" Age="85">Invented the first compiler.</PersonCard>
+    </div>
+    <div class="col-md-4">
+        <PersonCard Name="Alan Turing" Age="41">Developed the Turing machine.</PersonCard>
+    </div>
+</div>
+
+<h2>4. Named render fragments (multi-section content)</h2>
+
+<p>The <code>Compare</code> component (<code>Components/Shared/Compare.razor</code>) accepts two render
+    fragments, <code>Plain</code> and <code>Bootstrapped</code>. The Bootstrap vs Plain page is built entirely from it.</p>
+
+<pre><code>&lt;Compare Title="Panels"&gt;
+    &lt;Plain&gt;Left content&lt;/Plain&gt;
+    &lt;Bootstrapped&gt;Right content&lt;/Bootstrapped&gt;
+&lt;/Compare&gt;</code></pre>
+
+<Compare Title="Two panels from one component">
+    <Plain>This is the <code>Plain</code> fragment.</Plain>
+    <Bootstrapped>This is the <code>Bootstrapped</code> fragment.</Bootstrapped>
+</Compare>
+
+<h2>5. Templated components</h2>
+
+<p>The <code>FancyList</code> component takes a list and a per-item template (<code>RenderFragment&lt;string&gt;</code>).
+    The parent decides how each item looks using the <code>context</code> variable.</p>
+
+<pre><code>&lt;FancyList Items="fruits"&gt;
+    &lt;ItemTemplate context="fruit"&gt;
+        &lt;span class="fw-bold"&gt;@@fruit&lt;/span&gt;
+    &lt;/ItemTemplate&gt;
+&lt;/FancyList&gt;</code></pre>
+
+<FancyList Items="fruits">
+    <ItemTemplate context="fruit">
+        <span class="badge text-bg-success me-1">@fruit</span>
+    </ItemTemplate>
+</FancyList>
+
+<h2>6. EditForm: validation with DataAnnotations</h2>
+
+<pre><code>&lt;EditForm Model="form" OnValidSubmit="HandleValidSubmit"&gt;
+    &lt;DataAnnotationsValidator/&gt;
+    &lt;ValidationSummary/&gt;
+    &lt;InputText @@bind-Value="form.Name"/&gt;
+    &lt;ValidationMessage For="() =&gt; form.Name"/&gt;
+&lt;/EditForm&gt;</code></pre>
+
+<EditForm Model="form" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <InputText class="form-control" @bind-Value="form.Name"/>
+        <ValidationMessage For="() => form.Name" class="text-danger"/>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Age</label>
+        <InputNumber class="form-control" @bind-Value="form.Age"/>
+        <ValidationMessage For="() => form.Age" class="text-danger"/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@if (submitted is not null)
+{
+    <div class="alert alert-success mt-3">@submitted</div>
+}
+
+<h2>7. Virtualize: rendering big lists cheaply</h2>
+
+<p>Only the rows that fit on screen are actually created in the DOM. Scroll this list (500 rows).</p>
+
+<p class="text-muted">Note: during the very first (static) page load the list looks empty, because the list is
+    measured by JavaScript once the interactive circuit connects, then rows appear.</p>
+
+<div style="height: 180px; overflow-y: auto;" class="border rounded p-2">
+    <Virtualize Items="bigList" Context="item" ItemSize="36">
+        <div class="border-bottom py-1">@item</div>
+    </Virtualize>
+</div>
+
+@code {
+    private PersonForm form = new();
+    private string? submitted;
+    private readonly List<string> fruits = new() { "Apple", "Banana", "Cherry", "Date", "Elderberry" };
+    private readonly string[] bigList = Enumerable.Range(1, 500).Select(i => $"Row number {i}").ToArray();
+
+    private void HandleValidSubmit()
+    {
+        submitted = $"Saved: {form.Name}, age {form.Age}.";
+    }
+
+    private class PersonForm
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        public string Name { get; set; } = "";
+
+        [Range(1, 120, ErrorMessage = "Age must be between 1 and 120.")]
+        public int Age { get; set; } = 30;
+    }
+}

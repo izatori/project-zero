@@ -1,0 +1,44 @@
+@* Compare.razor
+   A reusable component that draws two panels side by side: "Plain HTML" vs "With Bootstrap".
+   It demonstrates three Razor features:
+   1. [Parameter] properties -> the component accepts values from the parent.
+   2. Named RenderFragment parameters -> the parent passes whole markup blocks as content.
+   3. Default parameter values.
+
+   Notice: no @page directive here, so this file is a reusable component, not a route. *@
+
+<div class="compare-block">
+    <h3 class="h5 text-secondary border-bottom pb-2 mb-3">@Title</h3>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="compare-panel">
+                <div class="compare-label">@PlainTitle</div>
+                <div class="compare-body">
+                    @Plain
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="compare-panel compare-panel-hot">
+                <div class="compare-label">@BootstrappedTitle</div>
+                <div class="compare-body">
+                    @Bootstrapped
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+
+    [Parameter] public string PlainTitle { get; set; } = "Plain HTML";
+
+    [Parameter] public string BootstrappedTitle { get; set; } = "With Bootstrap";
+
+    [Parameter] public RenderFragment? Plain { get; set; }
+
+    [Parameter] public RenderFragment? Bootstrapped { get; set; }
+}

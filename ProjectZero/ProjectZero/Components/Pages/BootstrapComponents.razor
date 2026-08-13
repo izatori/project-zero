@@ -1,0 +1,218 @@
+@page "/bootstrap-components"
+@rendermode InteractiveServer
+
+<PageTitle>Bootstrap Components</PageTitle>
+
+<h1>Bootstrap components showcase</h1>
+
+<p class="lead">A gallery of Bootstrap building blocks. The interactive pieces (accordion, carousel, modal,
+    dropdown) are driven by <code>data-bs-*</code> attributes and Bootstrap's JS bundle.</p>
+
+<hr/>
+
+<div class="p-4 mb-4 rounded-3 shadow bg-primary text-white">
+    <h2 class="display-6 fw-bold mb-2">Hero banner</h2>
+    <p class="lead mb-3">Built with <code>p-4</code>, <code>bg-primary</code>, <code>text-white</code>, <code>rounded-3</code>, <code>shadow</code>.</p>
+    <button class="btn btn-light btn-lg" @onclick="() => heroClicks++">You clicked @heroClicks times</button>
+</div>
+
+<h2>Buttons and button groups</h2>
+
+<div class="mb-2">
+    <button class="btn btn-primary">Primary</button>
+    <button class="btn btn-outline-success">Outline success</button>
+    <button class="btn btn-danger btn-sm">Small danger</button>
+    <button class="btn btn-warning btn-lg">Large warning</button>
+    <button class="btn btn-secondary" disabled>Disabled</button>
+</div>
+<div class="btn-group mb-4" role="group">
+    <button class="btn btn-outline-primary">Left</button>
+    <button class="btn btn-outline-primary">Middle</button>
+    <button class="btn btn-outline-primary">Right</button>
+</div>
+
+<h2>Progress bars and spinners</h2>
+
+<div class="mb-2">
+    <div class="progress mb-2" style="height: 25px;">
+        <div class="progress-bar" role="progressbar" style="width: @progressValue%;">@progressValue%</div>
+    </div>
+    <button class="btn btn-sm btn-outline-primary" @onclick="IncreaseProgress">+10%</button>
+    <button class="btn btn-sm btn-outline-secondary" @onclick="() => progressValue = 0">Reset</button>
+</div>
+
+<div class="mb-4">
+    <div class="spinner-border text-primary" role="status"></div>
+    <div class="spinner-grow text-success" role="status"></div>
+    <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+</div>
+
+<h2>Cards in a responsive grid</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Free</h5>
+                <p class="card-text">Just the essentials.</p>
+            </div>
+            <div class="card-footer"><button class="btn btn-outline-primary w-100">Choose</button></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-body">
+                <h5 class="card-title">Pro <span class="badge text-bg-primary">Popular</span></h5>
+                <p class="card-text">Everything in Free plus extras.</p>
+            </div>
+            <div class="card-footer"><button class="btn btn-primary w-100">Choose</button></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Enterprise</h5>
+                <p class="card-text">For large teams.</p>
+            </div>
+            <div class="card-footer"><button class="btn btn-outline-primary w-100">Contact us</button></div>
+        </div>
+    </div>
+</div>
+
+<h2>Accordion</h2>
+
+<div class="accordion mb-4" id="demoAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accOne">
+                What is Razor?
+            </button>
+        </h2>
+        <div id="accOne" class="accordion-collapse collapse show" data-bs-parent="#demoAccordion">
+            <div class="accordion-body">
+                A markup syntax that mixes HTML with C#. The <code>@@</code> character switches to code.
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accTwo">
+                Why Bootstrap?
+            </button>
+        </h2>
+        <div id="accTwo" class="accordion-collapse collapse" data-bs-parent="#demoAccordion">
+            <div class="accordion-body">
+                Ready-made CSS and JS components: grid, buttons, cards, forms and more.
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Carousel</h2>
+
+<div id="demoCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="0" class="active"></button>
+        <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#demoCarousel" data-bs-slide-to="2"></button>
+    </div>
+    <div class="carousel-inner rounded-3">
+        <div class="carousel-item active">
+            <div class="demo-slide bg-primary">Slide 1</div>
+        </div>
+        <div class="carousel-item">
+            <div class="demo-slide bg-success">Slide 2</div>
+        </div>
+        <div class="carousel-item">
+            <div class="demo-slide bg-warning text-dark">Slide 3</div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#demoCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#demoCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<h2>Dropdown and modal</h2>
+
+<div class="d-flex gap-3 mb-4">
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Dropdown button
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action one</a></li>
+            <li><a class="dropdown-item" href="#">Action two</a></li>
+            <li><hr class="dropdown-divider"/></li>
+            <li><a class="dropdown-item text-danger" href="#">Delete</a></li>
+        </ul>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#demoModal">
+        Launch modal
+    </button>
+</div>
+
+<div class="modal fade" id="demoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Modal content goes here. This window is triggered with
+                <code>data-bs-toggle="modal"</code> and <code>data-bs-target="#demoModal"</code>.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Forms with Bootstrap classes</h2>
+
+<div class="mb-3">
+    <label class="form-label" for="demoEmail">Email address</label>
+    <input id="demoEmail" type="email" class="form-control" placeholder="name@example.com"/>
+</div>
+<div class="mb-3">
+    <label class="form-label" for="demoInputGroup">Input group</label>
+    <div class="input-group">
+        <span class="input-group-text">@@</span>
+        <input id="demoInputGroup" type="text" class="form-control" placeholder="username"/>
+    </div>
+</div>
+<div class="mb-3">
+    <label class="form-label">Rating</label>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="rating" id="rate1" checked/>
+        <label class="form-check-label" for="rate1">One star</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="rating" id="rate2"/>
+        <label class="form-check-label" for="rate2">Two stars</label>
+    </div>
+</div>
+
+<button type="button" class="btn btn-success" @onclick="() => submitted = true">Submit demo form</button>
+
+@if (submitted)
+{
+    <div class="alert alert-success mt-3">The demo form was submitted (no backend wired up here).</div>
+}
+
+@code {
+    private int heroClicks;
+    private int progressValue = 65;
+    private bool submitted;
+
+    private void IncreaseProgress()
+    {
+        progressValue = Math.Min(100, progressValue + 10);
+    }
+}

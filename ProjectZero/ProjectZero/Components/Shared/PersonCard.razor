@@ -1,0 +1,28 @@
+@* PersonCard.razor
+   A small custom component used to demonstrate [Parameter] and ChildContent.
+
+   [Parameter] string? Name   -> set from the parent: <PersonCard Name="Ada" ... />
+   [Parameter] int Age        -> same idea, a typed value
+   [Parameter] RenderFragment? ChildContent -> any markup between the opening
+                                               and closing tags of the component
+
+   The special property name ChildContent is what the inner content is bound to. *@
+
+<div class="card h-100">
+    <div class="card-body">
+        <h5 class="card-title">@Name</h5>
+        <p class="card-text">Age: @Age</p>
+        @if (ChildContent is not null)
+        {
+            <p class="card-text small text-muted">@ChildContent</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Name { get; set; }
+
+    [Parameter] public int Age { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

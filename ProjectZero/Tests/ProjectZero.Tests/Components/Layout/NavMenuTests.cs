@@ -12,12 +12,27 @@ public class NavMenuTests : IDisposable
     {
         var cut = _context.Render<NavMenu>();
 
-        var links = cut.FindAll("nav a");
+        var links = cut.FindAll("nav a").Select(l => l.GetAttribute("href"));
 
-        Assert.Equal(3, links.Count);
-        Assert.Contains(links, l => l.GetAttribute("href") == "");
-        Assert.Contains(links, l => l.GetAttribute("href") == "counter");
-        Assert.Contains(links, l => l.GetAttribute("href") == "weather");
+        Assert.Contains("", links);
+        Assert.Contains("razor-syntax", links);
+        Assert.Contains("razor-components", links);
+        Assert.Contains("bootstrap-comparison", links);
+        Assert.Contains("bootstrap-components", links);
+        Assert.Contains("playground", links);
+        Assert.Contains("counter", links);
+        Assert.Contains("weather", links);
+    }
+
+    [Fact]
+    public void NavMenu_PlaygroundHasExpandableSubLinks()
+    {
+        var cut = _context.Render<NavMenu>();
+
+        var toggler = cut.Find("button.nav-sublink-toggle");
+        var target = toggler.GetAttribute("data-bs-target");
+        Assert.Equal("playgroundSubs", target?.TrimStart('#'));
+        Assert.NotNull(cut.Find("#playgroundSubs"));
     }
 
     [Fact]

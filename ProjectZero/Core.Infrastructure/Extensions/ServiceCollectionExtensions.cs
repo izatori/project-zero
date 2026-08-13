@@ -29,8 +29,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Register domain services
-        services.AddScoped<IUserDomainService, UserDomainService>();
-        services.AddScoped<IEmailDomainService, EmailDomainService>();
+        services.AddScoped<IDeleteMeUserDomainService, DeleteMeUserDomainService>();
+        services.AddScoped<IDeleteMeEmailDomainService, DeleteMeEmailDomainService>();
 
         return services;
     }
@@ -59,8 +59,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Register domain services
-        services.AddScoped<IUserDomainService, UserDomainService>();
-        services.AddScoped<IEmailDomainService, EmailDomainService>();
+        services.AddScoped<IDeleteMeUserDomainService, DeleteMeUserDomainService>();
+        services.AddScoped<IDeleteMeEmailDomainService, DeleteMeEmailDomainService>();
 
         return services;
     }

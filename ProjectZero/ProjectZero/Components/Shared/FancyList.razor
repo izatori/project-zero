@@ -1,0 +1,36 @@
+@* FancyList.razor
+   A "templated" component: it accepts a list of items plus a RenderFragment<string>
+   that the parent controls. The parent decides how EACH item is rendered.
+
+   [Parameter] IReadOnlyList<string> Items        -> data
+   [Parameter] RenderFragment<string>? ItemTemplate -> per-item markup; the
+       variable (called "context" by default) holds the current item.
+
+   In the parent you use:
+   <FancyList Items="someList">
+       <ItemTemplate context="item">
+           ... markup that can use @item ...
+       </ItemTemplate>
+   </FancyList> *@
+
+<ol class="fancy-list">
+    @foreach (var item in Items)
+    {
+        <li class="mb-1">
+            @if (ItemTemplate is not null)
+            {
+                @ItemTemplate(item)
+            }
+            else
+            {
+                <text>@item</text>
+            }
+        </li>
+    }
+</ol>
+
+@code {
+    [Parameter] public IReadOnlyList<string> Items { get; set; } = Array.Empty<string>();
+
+    [Parameter] public RenderFragment<string>? ItemTemplate { get; set; }
+}

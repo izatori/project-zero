@@ -1,0 +1,266 @@
+@page "/razor-syntax"
+@rendermode InteractiveServer
+
+<PageTitle>Razor Syntax</PageTitle>
+
+<h1>Razor syntax</h1>
+
+<p class="lead">
+    A <code>.razor</code> file mixes HTML markup with C#. The <code>@@</code> character is the
+    Razor transition: whatever follows it is treated as C# (or a directive), everything else is HTML.
+</p>
+
+<hr/>
+
+<h2>1. Anatomy of a .razor file</h2>
+
+<pre><code>@@page "/razor-syntax"          // route this page is reached at
+@@rendermode InteractiveServer  // enables event handlers / binding
+
+&lt;PageTitle&gt;Demo&lt;/PageTitle&gt;     // sets the browser tab title
+
+&lt;h1&gt;Hello, world!&lt;/h1&gt;          // ordinary HTML, written as-is
+
+&lt;p&gt;You are visitor @@number&lt;/p&gt; // @@number renders the field value
+
+@@code {                        // C# members live here
+    private int number = 42;
+}</code></pre>
+
+<ul>
+    <li>Files <em>with</em> <code>@@page</code> are routable pages.</li>
+    <li>Files <em>without</em> <code>@@page</code> are reusable components (e.g. <code>Compare.razor</code>).</li>
+</ul>
+
+<h2>2. Directives</h2>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Directive</th>
+        <th>Purpose</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td><code>@@page "/route"</code></td><td>Makes the file a routable page.</td></tr>
+    <tr><td><code>@@code { ... }</code></td><td>C# members (fields, methods, event handlers).</td></tr>
+    <tr><td><code>@@functions { ... }</code></td><td>Older alias for <code>@@code</code>.</td></tr>
+    <tr><td><code>@@using Namespace</code></td><td>Import a namespace (also global in <code>_Imports.razor</code>).</td></tr>
+    <tr><td><code>@@inject IService svc</code></td><td>Dependency injection (equivalent to <code>[Inject]</code>).</td></tr>
+    <tr><td><code>@@inherits BaseType</code></td><td>Inherit from a base class (e.g. <code>LayoutComponentBase</code>).</td></tr>
+    <tr><td><code>@@implements IInterface</code></td><td>Implement an interface, e.g. <code>IDisposable</code>.</td></tr>
+    <tr><td><code>@@attribute [StreamRendering]</code></td><td>Apply a C# attribute to the component class.</td></tr>
+    <tr><td><code>@@rendermode InteractiveServer</code></td><td>Runs this page in an interactive server circuit.</td></tr>
+    <tr><td><code>@@layout MainLayout</code></td><td>Pick a layout for this page.</td></tr>
+    <tr><td><code>@@typeparam TItem</code></td><td>Makes the component generic.</td></tr>
+    <tr><td><code>@@namespace X.Y</code></td><td>Override the generated class namespace.</td></tr>
+    <tr><td><code>@@preservewhitespace true</code></td><td>Keep whitespace in the rendered output.</td></tr>
+    </tbody>
+</table>
+
+<h2>3. Expressions</h2>
+
+<p>An <code>@@</code> followed by a value is an <em>implicit</em> expression. Use parentheses for an
+    <em>explicit</em> expression when Razor would otherwise misread the boundary.</p>
+
+<pre><code>@@message                    // implicit: prints the field value
+@@message.ToUpper()          // implicit: method call
+@@(message)suffix            // explicit: @(message) then "suffix"
+@@messagesuffix              // BAD: Razor reads "messagesuffix"</code></pre>
+
+<div class="mb-3">
+    <p>Implicit expression: <span class="fw-bold">@message</span></p>
+    <p>Explicit expression: <span class="fw-bold">@(2 + 3)</span> (and fruit count is <span class="fw-bold">@fruits.Count</span>)</p>
+    <p>Method call: <span class="fw-bold">@DateTime.Now.ToShortDateString()</span></p>
+    <p>Parenthesised expression then literal text: <span class="fw-bold">@(message) suffix</span></p>
+</div>
+
+<h2>4. Control flow</h2>
+
+<pre><code>@@if (condition) { ... } else { ... }
+
+@@for (int i = 0; i &lt; 5; i++) { ... }
+
+@@foreach (var item in items) { ... }
+
+@@switch (value) { case "a": ... break; default: ... break; }</code></pre>
+
+<h5>@@if / @@else (live)</h5>
+<button class="btn btn-outline-primary btn-sm" @onclick="() => showExtra = !showExtra">
+    @(showExtra ? "Hide" : "Show") extra paragraph
+</button>
+@if (showExtra)
+{
+    <p class="alert alert-info mt-2">This <code>@@if</code> block is rendering right now.</p>
+}
+else
+{
+    <p class="alert alert-light mt-2">Nothing extra (the <code>@@else</code> branch is active).</p>
+}
+
+<h5 class="mt-3">@@for (live)</h5>
+<div>
+    @for (var i = 1; i <= 5; i++)
+    {
+        <span class="badge text-bg-secondary me-1">@i</span>
+    }
+</div>
+
+<h5 class="mt-3">@@foreach (live)</h5>
+<ul>
+    @foreach (var fruit in fruits)
+    {
+        <li>@fruit</li>
+    }
+</ul>
+
+<h5 class="mt-3">@@switch (live)</h5>
+<div class="mb-2">
+    @foreach (var letter in new[] { "alpha", "beta", "gamma" })
+    {
+        <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => kind = letter">@letter</button>
+    }
+</div>
+@switch (kind)
+{
+    case "alpha":
+        <p>You picked alpha.</p>
+        break;
+    case "beta":
+        <p>You picked beta.</p>
+        break;
+    default:
+        <p>Pick a letter above.</p>
+        break;
+}
+
+<h2>5. Inline code blocks: <code>@@{ }</code></h2>
+
+<p>Use <code>@@{ ... }</code> to run a few statements and define local variables inline (not persisted).</p>
+
+<pre><code>@@{
+    var greeting = "Hello";
+    var now = DateTime.Now;
+}
+&lt;p&gt;@@greeting, the time is @@now.ToString("HH:mm").&lt;/p&gt;</code></pre>
+
+<div class="mb-3">
+    @{
+        var greeting = "Hello";
+        var now = DateTime.Now;
+    }
+    <p class="fw-bold">@greeting, the time is @now.ToString("HH:mm").</p>
+</div>
+
+<h2>6. Comments</h2>
+
+<pre><code>@@* A Razor comment: stripped out, never sent to the browser. *&#64;
+
+&lt;!-- An HTML comment: kept and sent to the browser. --&gt;
+
+@@code {
+    // C# line comment
+    /* C# block comment */
+}</code></pre>
+
+<p>Right-click this page and choose <em>View Page Source</em>: the Razor comment is gone, the HTML comment is there.</p>
+
+<h2>7. Writing literal text: <code>@@:</code> and <code>&lt;text&gt;</code></h2>
+
+<p>Inside a code block (like <code>@@if</code>), Razor expects HTML. To emit raw text instead,
+    start a line with <code>@@:</code> or wrap it in <code>&lt;text&gt;</code>.</p>
+
+<pre><code>@@if (showText) {
+    @@: A plain-text line.
+    &lt;text&gt;Another raw text line.&lt;/text&gt;
+}</code></pre>
+
+<div class="mb-3">
+    <button class="btn btn-outline-primary btn-sm" @onclick="() => showText = !showText">Toggle text</button>
+    @if (showText)
+    {
+        @: A plain-text line written with @@:
+        <text>Another raw text line written with &lt;text&gt;.</text>
+    }
+</div>
+
+<h2>8. Attributes, events and data binding</h2>
+
+<pre><code>&lt;button @@onclick="Increment"&gt;Click&lt;/button&gt;              // event handler method
+&lt;button @@onclick="() =&gt; count++"&gt;Click&lt;/button&gt;         // event handler lambda
+&lt;button @@onclick="Increment" @@onclick:stopPropagation&gt; // stop event bubbling
+&lt;a @@onclick="Go" @@onclick:preventDefault href="#"&gt;Link&lt;/a&gt; // suppress default behavior
+
+&lt;input @@bind="text" /&gt;                        // two-way binding (change event)
+&lt;input @@bind="text" @@bind:event="oninput" /&gt;  // bind on every keystroke
+
+&lt;p @@ref="paragraph"&gt;...&lt;/p&gt;                   // element reference
+&lt;li @@key="item.Id"&gt;...&lt;/li&gt;                   // identity hint for list diffing
+&lt;div @@attributes="extraAttrs"&gt;...&lt;/div&gt;       // splat a dictionary of attrs</code></pre>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <p>Count: <span class="fw-bold">@count</span></p>
+        <button class="btn btn-primary" @onclick="Increment">Increment (event method)</button>
+    </div>
+    <div class="col-md-6">
+        <input class="form-control" @bind="boundText" @bind:event="oninput" placeholder="Type something..."/>
+        <p class="mt-2">You typed: <span class="fw-bold">@boundText</span></p>
+    </div>
+</div>
+
+<h2>9. The <code>@@code</code> block</h2>
+
+<pre><code>@@code {
+    private int count = 0;                 // field used by markup above
+    private string? boundText;
+
+    private void Increment() =&gt; count++;   // method invoked by @@onclick
+
+    private async Task LoadAsync()
+    {
+        // you can await async work here
+    }
+}</code></pre>
+
+<h2>10. Common keywords at a glance</h2>
+
+<p>
+    <span class="badge text-bg-primary me-1">@@page</span>
+    <span class="badge text-bg-primary me-1">@@code</span>
+    <span class="badge text-bg-primary me-1">@@if / @@else</span>
+    <span class="badge text-bg-primary me-1">@@for</span>
+    <span class="badge text-bg-primary me-1">@@foreach</span>
+    <span class="badge text-bg-primary me-1">@@while</span>
+    <span class="badge text-bg-primary me-1">@@switch</span>
+    <span class="badge text-bg-primary me-1">@@try</span>
+    <span class="badge text-bg-primary me-1">@@using</span>
+    <span class="badge text-bg-primary me-1">@@inject</span>
+    <span class="badge text-bg-primary me-1">@@inherits</span>
+    <span class="badge text-bg-primary me-1">@@implements</span>
+    <span class="badge text-bg-primary me-1">@@attribute</span>
+    <span class="badge text-bg-primary me-1">@@layout</span>
+    <span class="badge text-bg-primary me-1">@@rendermode</span>
+    <span class="badge text-bg-primary me-1">@@bind</span>
+    <span class="badge text-bg-primary me-1">@@onclick</span>
+    <span class="badge text-bg-primary me-1">@@key</span>
+    <span class="badge text-bg-primary me-1">@@ref</span>
+    <span class="badge text-bg-primary me-1">@@attributes</span>
+    <span class="badge text-bg-primary me-1">@@Body</span>
+    <span class="badge text-bg-primary me-1">@@ChildContent</span>
+</p>
+
+@code {
+    private string message = "Hello from a field";
+    private bool showExtra = true;
+    private bool showText = true;
+    private string kind = "";
+    private int count = 0;
+    private string? boundText;
+    private readonly List<string> fruits = new() { "Apple", "Banana", "Cherry" };
+
+    private void Increment()
+    {
+        count++;
+    }
+}
