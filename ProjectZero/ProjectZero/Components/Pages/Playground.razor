@@ -37,7 +37,7 @@
             </div>
 
             <div class="card-body">
-                <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+                <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger mb-3" />
 
@@ -46,38 +46,39 @@
                             <label for="name" class="form-label fw-medium">Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-tag"></i></span>
-                                <InputText id="name" class="form-control" placeholder="e.g. Golden Gate" @bind-Value="model.Name" />
+                                <InputText id="name" class="form-control" placeholder="e.g. Golden Gate" @bind-Value="Model.Name" />
                             </div>
-                            <ValidationMessage For="@(() => model.Name)" />
+                            <ValidationMessage For="@(() => Model.Name)" />
                         </div>
 
                         <div class="col-md-6">
                             <label for="fileName" class="form-label fw-medium">File name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-file-earmark-image"></i></span>
-                                <InputText id="fileName" class="form-control" placeholder="e.g. photo.jpg" @bind-Value="model.FileName" />
+                                <InputText id="fileName" class="form-control" placeholder="e.g. photo.jpg" @bind-Value="Model.FileName" />
                             </div>
-                            <ValidationMessage For="@(() => model.FileName)" />
+                            <ValidationMessage For="@(() => Model.FileName)" />
                         </div>
 
                         <div class="col-12">
                             <label for="description" class="form-label fw-medium">Description</label>
-                            <InputTextArea id="description" class="form-control" rows="4" placeholder="Optional product description" @bind-Value="model.Description" />
+                            <InputTextArea id="description" class="form-control" rows="4" placeholder="Optional product description" @bind-Value="Model.Description" />
                         </div>
 
                         <div class="col-md-6">
                             <label for="price" class="form-label fw-medium">Price</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
-                                <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
+                                <InputNumber id="price" class="form-control" @bind-Value="Model.Price" />
                             </div>
-                            <ValidationMessage For="@(() => model.Price)" />
+                            <ValidationMessage For="@(() => Model.Price)" />
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
                         <button type="submit" class="btn btn-primary px-4">
-                            <i class="bi bi-check-lg me-1"></i>Add Product
+                            Add Product
+                            <i class="bi bi-arrow-bar-up me-1"></i>
                         </button>
                     </div>
                 </EditForm>
@@ -99,18 +100,18 @@
 </div>
 
 @code {
-    private ProductFormModel model { get; set; } = new();
+    private ProductFormModel Model { get; set; } = new();
     private bool _showSuccess;
 
     private async Task HandleValidSubmit()
     {
         await Sender.Send(new CreateProductCommand(
-            model.Name,
-            model.FileName,
-            string.IsNullOrEmpty(model.Description) ? "" : model.Description,
-            model.Price));
+            Model.Name,
+            Model.FileName,
+            string.IsNullOrEmpty(Model.Description) ? "" : Model.Description,
+            Model.Price));
 
-        model = new ProductFormModel();
+        Model = new ProductFormModel();
         _showSuccess = true;
 
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
@@ -128,44 +129,3 @@
         public double Price { get; set; }
     }
 }
-
-<style>
-    .playground-page {
-        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
-        min-height: 100vh;
-    }
-
-    .playground-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
-        color: #fff;
-        font-size: 24px;
-        box-shadow: 0 6px 16px rgba(13, 110, 253, 0.25);
-    }
-
-    .playground-page .card {
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .playground-page .input-group-text {
-        background: #f1f3f5;
-        border: 1px solid #dee2e6;
-        color: #6c757d;
-    }
-
-    .playground-page .form-control:focus,
-    .playground-page .form-select:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
-    }
-
-    .playground-page .alert-success {
-        border: none;
-        border-radius: 12px;
-        background: #d1e7dd;
-        color: #0f5132;
-    }
-</style>

@@ -2,7 +2,7 @@
 @using Core.Application.Features.Products.GetProducts
 @using MediatR
 @implements IAsyncDisposable
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRunTime
 @inject ISender Sender
 
 <div class="row">
@@ -57,8 +57,8 @@
 
             try
             {
-                var width = await JSRuntime.InvokeAsync<int>("getWindowWidth");
-                await JSRuntime.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+                var width = await JsRunTime.InvokeAsync<int>("getWindowWidth");
+                await JsRunTime.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
 
                 _screenWidth = width;
                 SetCurrentItemsPerRow();
@@ -110,7 +110,7 @@
     {
         if (_dotNetRef is not null)
         {
-            await JSRuntime.InvokeVoidAsync("unregisterResizeHandler", _dotNetRef);
+            await JsRunTime.InvokeVoidAsync("unregisterResizeHandler", _dotNetRef);
             _dotNetRef.Dispose();
         }
     }
