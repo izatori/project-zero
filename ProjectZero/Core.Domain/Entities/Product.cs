@@ -1,4 +1,4 @@
-﻿giusing System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Core.Domain.Abstractions;
 
 namespace Core.Domain.Entities;
