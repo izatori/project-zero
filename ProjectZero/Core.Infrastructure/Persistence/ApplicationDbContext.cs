@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Product> Products { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +32,19 @@ public class ApplicationDbContext : DbContext
 
             // Unique constraint on email
             builder.HasIndex(u => u.Email).IsUnique();
+        });
+        
+        // Product configuration
+        modelBuilder.Entity<Product>(builder =>
+        {
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.Name).IsRequired().HasMaxLength(255);
+            builder.Property(p => p.FileName).IsRequired().HasMaxLength(255);
+            builder.Property(p => p.Price).IsRequired();
+            builder.Property(p => p.Description).IsRequired().HasMaxLength(1023);
+            builder.Property(p => p.CreatedAt).IsRequired();
+            builder.Property(p => p.UpdatedAt);
+            builder.Property(p => p.IsActive).IsRequired();
         });
     }
 }
