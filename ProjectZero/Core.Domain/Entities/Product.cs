@@ -25,7 +25,7 @@ public class Product : AggregateRoot<Guid>
     
     public double Price { get; private set; }
     
-    public string? Description { get; private set; }
+    public string Description { get; private set; }
     
     public DateTime CreatedAt { get; private set; }
     
@@ -45,7 +45,7 @@ public class Product : AggregateRoot<Guid>
         
         var product = new Product(Guid.NewGuid(), name, fileName, price, description);
         
-        // TODO: prouct.RaiseDomainEvent(new ProductCreatedEvent(product.Id, name, fileName, price, description));
+        product.RaiseDomainEvent(new ProductCreatedEvent(product.Id, name, fileName, price, description));
         
         return product;
     }
@@ -81,13 +81,13 @@ public class Product : AggregateRoot<Guid>
 
         UpdatedAt = DateTime.UtcNow;
         
-        // TODO: RaiseDomainEvent UpdateProductEvent
+        RaiseDomainEvent(new ProductUpdatedEvent(Id, Name, FileName, Price, Description));
     }
 
     /// <summary>
     /// Deactivate the product.
     /// </summary>
-    public void Delete()
+    public void Deaktivate()
     {
         if (!IsActive)
         {
@@ -97,7 +97,7 @@ public class Product : AggregateRoot<Guid>
         IsActive = false;
         UpdatedAt = DateTime.UtcNow;
         
-        // TODO: Raise DeaktivateEvent
+        RaiseDomainEvent(new ProductDeaktivatedEvent(Id));
     }
     /// <summary>
     /// Validates the product name.
@@ -147,4 +147,50 @@ public class Product : AggregateRoot<Guid>
             throw new ArgumentException("Price cannot be negative", nameof(price));
         }
     }
+}
+
+public class ProductCreatedEvent : DomainEvent
+{
+    public ProductCreatedEvent(Guid id, string name, string fileName, double price, string description)
+    {
+        ProductId = id;
+        Name = name;
+        FileName = fileName;
+        Price = price;
+        Description = description;
+    }
+    
+    public Guid ProductId { get; private set; }
+    public string Name { get; private set; }
+    public string FileName { get; private set; }
+    public double Price { get; private set; }
+    public string Description { get; private set; }
+}
+
+public class ProductUpdatedEvent : DomainEvent
+{
+    public ProductUpdatedEvent(Guid id, string name, string fileName, double price, string description)
+    {
+        ProductId = id;
+        Name = name;
+        FileName = fileName;
+        Price = price;
+        Description = description;
+    }
+    
+    public Guid ProductId { get; private set; }
+    public string Name { get; private set; }
+    public string FileName { get; private set; }
+    public double Price { get; private set; }
+    public string Description { get; private set; }
+}
+
+public class ProductDeaktivatedEvent : DomainEvent
+{
+    public ProductDeaktivatedEvent(Guid id)
+    {
+        ProductId = id;
+    }
+    
+    public Guid ProductId { get; private set; }
 }
