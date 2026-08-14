@@ -4,7 +4,7 @@ namespace Core.Application.DTOs;
 /// Data Transfer Object for User.
 /// Used to transfer user data between layers.
 /// </summary>
-public record UserDTO(
+public record UserDto(
     Guid Id,
     string Name,
     string Email,

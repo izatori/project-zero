@@ -7,5 +7,5 @@ public record ProductDto(
     double Price,
     string Description,
     DateTime CreationDate,
-    DateTime LastUpdateDate,
+    DateTime? LastUpdateDate,
     bool IsActive);

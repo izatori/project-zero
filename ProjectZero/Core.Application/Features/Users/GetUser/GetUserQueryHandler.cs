@@ -8,7 +8,7 @@ namespace Core.Application.Features.Users.GetUser;
 /// Handler for GetUserQuery.
 /// Retrieves and maps user data to DTO.
 /// </summary>
-public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDTO?>
+public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDto?>
 {
     private readonly IUserRepository _userRepository;
 
@@ -20,7 +20,7 @@ public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDTO?>
     /// <summary>
     /// Handles the retrieval of a user.
     /// </summary>
-    public async Task<UserDTO?> HandleAsync(GetUserQuery query, CancellationToken cancellationToken = default)
+    public async Task<UserDto?> HandleAsync(GetUserQuery query, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(query.UserId, cancellationToken);
 
@@ -28,7 +28,7 @@ public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDTO?>
             return null;
 
         // Map domain entity to DTO
-        return new UserDTO(
+        return new UserDto(
             user.Id,
             user.Name,
             user.Email,

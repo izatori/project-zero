@@ -1,4 +1,5 @@
 ﻿using Core.Application.Abstractions;
+using Core.Application.DTOs;
 
 namespace Core.Application.Features.Products.GetProduct;
 
@@ -6,4 +7,4 @@ namespace Core.Application.Features.Products.GetProduct;
 /// Query to get a product by ID.
 /// Queries represent read operations in CQRS.
 /// </summary>
-public record GetProductQuery(Guid ProductId) : IQuery<Guid>;
+public record GetProductQuery(Guid ProductId) : IQuery<ProductDto>;
