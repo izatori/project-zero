@@ -8,49 +8,94 @@
 
 <PageTitle>Playground</PageTitle>
 
-<h1>Playground</h1>
+<div class="playground-page py-4">
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-3 d-flex align-items-center justify-content-center playground-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+            <h1 class="mb-0 fw-bold">Playground</h1>
+            <p class="text-muted mb-0">Create and manage your products.</p>
+        </div>
+    </div>
 
-<p>An empty page to experiment with.</p>
+    <div class="container px-0">
+        @if (_showSuccess)
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Product added successfully.</span>
+            </div>
+        }
 
-<div class="container">
-    @if (_showSuccess)
-    {
-        <div class="alert alert-success" role="alert">Product added successfully.</div>
-    }
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>Add New Product
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Fill in the details below to create a product.</p>
+            </div>
 
-    <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" />
+            <div class="card-body">
+                <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
 
-        <div class="mb-3">
-            <label for="name" class="form-label">Name</label>
-            <InputText id="name" class="form-control" @bind-Value="model.Name" />
-            <ValidationMessage For="@(() => model.Name)" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label fw-medium">Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                <InputText id="name" class="form-control" placeholder="e.g. Golden Gate" @bind-Value="model.Name" />
+                            </div>
+                            <ValidationMessage For="@(() => model.Name)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fileName" class="form-label fw-medium">File name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-file-earmark-image"></i></span>
+                                <InputText id="fileName" class="form-control" placeholder="e.g. photo.jpg" @bind-Value="model.FileName" />
+                            </div>
+                            <ValidationMessage For="@(() => model.FileName)" />
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-medium">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="4" placeholder="Optional product description" @bind-Value="model.Description" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="price" class="form-label fw-medium">Price</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                                <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
+                            </div>
+                            <ValidationMessage For="@(() => model.Price)" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-lg me-1"></i>Add Product
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="fileName" class="form-label">File name</label>
-            <InputText id="fileName" class="form-control" @bind-Value="model.FileName" />
-            <ValidationMessage For="@(() => model.FileName)" />
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-grid me-2 text-primary"></i>Products
+                </h5>
+                <p class="text-muted small mb-0 mt-1">All products currently in the catalog.</p>
+            </div>
+            <div class="card-body">
+                <ProductRow></ProductRow>
+            </div>
         </div>
-
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <InputTextArea id="description" class="form-control" @bind-Value="model.Description" />
-        </div>
-
-        <div class="mb-3">
-            <label for="price" class="form-label">Price</label>
-            <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
-            <ValidationMessage For="@(() => model.Price)" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Add Product</button>
-    </EditForm>
-</div>
-
-<div class="container">
-    <ProductRow></ProductRow>
+    </div>
 </div>
 
 @code {
@@ -83,3 +128,44 @@
         public double Price { get; set; }
     }
 }
+
+<style>
+    .playground-page {
+        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+        min-height: 100vh;
+    }
+
+    .playground-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+        color: #fff;
+        font-size: 24px;
+        box-shadow: 0 6px 16px rgba(13, 110, 253, 0.25);
+    }
+
+    .playground-page .card {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .playground-page .input-group-text {
+        background: #f1f3f5;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+    }
+
+    .playground-page .form-control:focus,
+    .playground-page .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.12);
+    }
+
+    .playground-page .alert-success {
+        border: none;
+        border-radius: 12px;
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+</style>

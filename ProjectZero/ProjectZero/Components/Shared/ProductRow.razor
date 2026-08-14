@@ -6,7 +6,7 @@
 @inject ISender Sender
 
 <div class="row">
-@for (int i = 0; i < Math.Min(_currentItemsPerRow, _products.Count); i++)
+    @for (int i = 0; i < Math.Min(_currentItemsPerRow, _products.Count); i++)
     {
         <div class="col-@_gridDivider.ToString() col-md-@_gridDividerMd.ToString() col-lg-@_gridDividerLg.ToString() col-xl-@_gridDividerXl.ToString() p-3">
             <ProductCard Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description"></ProductCard>
@@ -39,24 +39,43 @@
     private List<ProductDto> _products = new();
     
     private DotNetObjectReference<ProductRow>? _dotNetRef;
+
+    private bool _initialized;
     
     protected override async Task OnInitializedAsync()
     {
         ValidateItemsPerRow();
         SetGridDivider();
-        SetCurrentItemsPerRow();
-
-        _products = (await Sender.Send(new GetProductsQuery(_currentItemsPerRow))).ToList();
-        if (_products.Count < _currentItemsPerRow) _currentItemsPerRow = _products.Count;
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (RendererInfo.IsInteractive && !_initialized)
         {
+            _initialized = true;
             _dotNetRef = DotNetObjectReference.Create(this);
-            await JSRuntime.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+
+            try
+            {
+                var width = await JSRuntime.InvokeAsync<int>("getWindowWidth");
+                await JSRuntime.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+
+                _screenWidth = width;
+                SetCurrentItemsPerRow();
+                await LoadProductsAsync();
+            }
+            catch
+            {
+                // Ignore failures during JS interop initialization on first render.
+            }
         }
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        _products = (await Sender.Send(new GetProductsQuery(_currentItemsPerRow))).ToList();
+        if (_products.Count < _currentItemsPerRow) _currentItemsPerRow = _products.Count;
+        StateHasChanged();
     }
 
     [JSInvokable]
@@ -64,9 +83,7 @@
     {
         _screenWidth = width;
         SetCurrentItemsPerRow();
-        _products = (await Sender.Send(new GetProductsQuery(_currentItemsPerRow))).ToList();
-        if (_products.Count < _currentItemsPerRow) _currentItemsPerRow = _products.Count;
-        StateHasChanged();
+        await LoadProductsAsync();
     }
 
     private void SetCurrentItemsPerRow()

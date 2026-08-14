@@ -1,3 +1,7 @@
+window.getWindowWidth = function () {
+    return window.innerWidth;
+};
+
 window.registerResizeHandler = function (dotNetRef) {
     const handler = () => dotNetRef.invokeMethodAsync('OnWindowResized', window.innerWidth);
     window.addEventListener('resize', handler);
