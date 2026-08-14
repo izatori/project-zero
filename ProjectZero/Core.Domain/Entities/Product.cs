@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿giusing System.Text.RegularExpressions;
 using Core.Domain.Abstractions;
 
 namespace Core.Domain.Entities;
@@ -87,7 +87,7 @@ public class Product : AggregateRoot<Guid>
     /// <summary>
     /// Deactivate the product.
     /// </summary>
-    public void Deactivgitate()
+    public void Deactivate()
     {
         if (!IsActive)
         {
@@ -131,9 +131,9 @@ public class Product : AggregateRoot<Guid>
             throw new ArgumentException("File-Name cannot contain spaces", nameof(fileName));
         }
         
-        if (!Regex.IsMatch(fileName, "^[a-zA-Z0-9_-]+$"))
+        if (!Regex.IsMatch(fileName, @"^[a-zA-Z0-9_-]+\.(jpe?g|png)$", RegexOptions.IgnoreCase))
         {
-            throw new ArgumentException("File-Name contains invalid characters. Must only contain letters, numbers, - and _", nameof(fileName));
+            throw new ArgumentException("File-Name must only contain letters, numbers, - and _ followed by a valid image extension", nameof(fileName));
         }
     }
 
