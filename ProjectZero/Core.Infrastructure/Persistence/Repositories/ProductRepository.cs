@@ -1,39 +1,44 @@
 ﻿using Core.Domain.Entities;
 using Core.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Infrastructure.Persistence.Repositories;
 
 public class ProductRepository : IProductRepository
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly ApplicationDbContext _context;
     
     public ProductRepository(ApplicationDbContext context)
     {
-        _dbContext = context ??  throw new ArgumentNullException(nameof(context));
+        _context = context ??  throw new ArgumentNullException(nameof(context));
     }
     
-    public Task AddAsync(Product aggregate, CancellationToken cancellationToken = default)
+    public async Task AddAsync(Product aggregate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        await _context.Products.AddAsync(aggregate, cancellationToken);
     }
 
-    public Task UpdateAsync(Product aggregate, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Product aggregate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        _context.Products.Update(aggregate);
+        await Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Product aggregate, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Product aggregate, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        _context.Products.Remove(aggregate);
+        await Task.CompletedTask;
     }
 
-    public Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+         return await _context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public Task<List<Product>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Product>> GetAllActiveAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return await _context.Products
+            .Where(p => p.IsActive)
+            .ToListAsync(cancellationToken);
     }
 }
