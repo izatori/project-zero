@@ -46,11 +46,7 @@ public static class ServiceCollectionExtensions
         // Register DbContext with SQL Server
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            // Uncomment when Microsoft.EntityFrameworkCore.SqlServer is added
-            // options.UseSqlServer(connectionString);
-
-            // For now, use InMemory
-            options.UseInMemoryDatabase("ProjectZero");
+            options.UseSqlServer(connectionString);
         });
 
         // Register repositories

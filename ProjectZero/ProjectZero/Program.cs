@@ -1,6 +1,8 @@
 using ProjectZero.Components;
 using Core.Application.Extensions;
 using Core.Infrastructure.Extensions;
+using Core.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,13 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 
 // Add infrastructure services
-builder.Services.AddInfrastructureServices();
+builder.Services.AddInfrastructureServices(builder.Configuration.GetConnectionString("Default")!);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
+
+// Apply pending EF Core migrations so the database schema is up to date
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
