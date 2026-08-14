@@ -4,6 +4,7 @@
 @using System.ComponentModel.DataAnnotations
 @using MediatR
 @inject ISender Sender
+@inject NavigationManager Navigation
 
 <PageTitle>Playground</PageTitle>
 
@@ -66,6 +67,8 @@
 
         model = new ProductFormModel();
         _showSuccess = true;
+
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
     }
 
     private class ProductFormModel
