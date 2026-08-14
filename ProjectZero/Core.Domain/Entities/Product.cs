@@ -87,7 +87,7 @@ public class Product : AggregateRoot<Guid>
     /// <summary>
     /// Deactivate the product.
     /// </summary>
-    public void Deaktivate()
+    public void Deactivgitate()
     {
         if (!IsActive)
         {
@@ -97,7 +97,7 @@ public class Product : AggregateRoot<Guid>
         IsActive = false;
         UpdatedAt = DateTime.UtcNow;
         
-        RaiseDomainEvent(new ProductDeaktivatedEvent(Id));
+        RaiseDomainEvent(new ProductDeactivatedEvent(Id));
     }
     /// <summary>
     /// Validates the product name.
@@ -149,6 +149,9 @@ public class Product : AggregateRoot<Guid>
     }
 }
 
+/// <summary>
+/// Domain event raised when a product is created.
+/// </summary>
 public class ProductCreatedEvent : DomainEvent
 {
     public ProductCreatedEvent(Guid id, string name, string fileName, double price, string description)
@@ -167,6 +170,9 @@ public class ProductCreatedEvent : DomainEvent
     public string Description { get; private set; }
 }
 
+/// <summary>
+/// Domain event raised when a product is updated.
+/// </summary>
 public class ProductUpdatedEvent : DomainEvent
 {
     public ProductUpdatedEvent(Guid id, string name, string fileName, double price, string description)
@@ -185,9 +191,12 @@ public class ProductUpdatedEvent : DomainEvent
     public string Description { get; private set; }
 }
 
-public class ProductDeaktivatedEvent : DomainEvent
+/// <summary>
+/// Domain event raised when a product is deactivated.
+/// </summary>
+public class ProductDeactivatedEvent : DomainEvent
 {
-    public ProductDeaktivatedEvent(Guid id)
+    public ProductDeactivatedEvent(Guid id)
     {
         ProductId = id;
     }
