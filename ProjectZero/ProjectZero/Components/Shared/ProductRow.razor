@@ -1,14 +1,130 @@
-﻿<div class="row">
-    <div class="col-md-3 border p-3">
-        <ProductCard></ProductCard>
-    </div>
-    <div class="col-md-3 border p-3">
-        Cell 2
-    </div>
-    <div class="col-md-3 border p-3">
-        Cell 3
-    </div>
-    <div class="col-md-3 border p-3">
-        Cell 3
-    </div>
+﻿@implements IAsyncDisposable
+@inject IJSRuntime JSRuntime
+
+<div class="row">
+@for (int i = 0; i < _currentItemsPerRow; i++)
+    {
+        <div class="col-@_gridDivider.ToString() col-md-@_gridDividerMd.ToString() col-lg-@_gridDividerLg.ToString() col-xl-@_gridDividerXl.ToString() p-3">
+            <ProductCard Name="Banana" FileName="banana.jpg" Description="@Description1"></ProductCard>
+        </div>
+    }
 </div>
+
+@code
+{
+    [Parameter] public int ItemsPerRow { get; set; } = 2;
+    
+    [Parameter] public int ItemsPerRowMd { get; set; } = 3;
+    
+    [Parameter] public int ItemsPerRowLg { get; set; } = 4;
+    
+    [Parameter] public int ItemsPerRowXl { get; set; } = 6;
+    
+    [Parameter] public string? Description1 { get; set; } = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minimum veniam";
+    
+    [Parameter] public string? Description2 { get; set; } = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt";
+    
+    [Parameter] public string? Description3 { get; set; } = "Lorem ipsum dolor sit amet";
+
+    private int _gridDivider;
+    
+    private int _gridDividerMd;
+    
+    private int _gridDividerLg;
+    
+    private int _gridDividerXl;
+    
+    private int _currentItemsPerRow = 3;
+    
+    private int _screenWidth;
+    
+    private DotNetObjectReference<ProductRow>? _dotNetRef;
+    
+    protected override void OnInitialized()
+    {
+        ValidateItemsPerRow();
+        SetGridDivider();
+        SetCurrentItemsPerRow();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("registerResizeHandler", _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnWindowResized(int width)
+    {
+        _screenWidth = width;
+        SetCurrentItemsPerRow();
+        StateHasChanged();
+    }
+
+    private void SetCurrentItemsPerRow()
+    {
+        if (_screenWidth == 0 || _screenWidth < 768)
+        {
+            _currentItemsPerRow = ItemsPerRow;
+        }
+        else if (_screenWidth < 992)
+        {
+            _currentItemsPerRow = ItemsPerRowMd;
+        }
+        else if (_screenWidth < 1200)
+        {
+            _currentItemsPerRow = ItemsPerRowLg;
+        }
+        else
+        {
+            _currentItemsPerRow = ItemsPerRowXl;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetRef is not null)
+        {
+            await JSRuntime.InvokeVoidAsync("unregisterResizeHandler", _dotNetRef);
+            _dotNetRef.Dispose();
+        }
+    }
+
+    private void ValidateItemsPerRow()
+    {
+        // If ItemsPerRow do not fit in the 12-part grid set to default
+        if (ItemsPerRowMd is < 1 or > 12 || 12 % ItemsPerRowMd != 0)
+        {
+            ItemsPerRowMd = 2;
+        }
+        
+        // If ItemsPerRowMd do not fit in the 12-part grid set to default
+        if (ItemsPerRowMd is < 1 or > 12 || 12 % ItemsPerRowMd != 0)
+        {
+            ItemsPerRowMd = 3;
+        }
+        
+        // If ItemsPerRowLg do not fit in the 12-part grid set to default
+        if (ItemsPerRowLg is < 1 or > 12 || 12 % ItemsPerRowLg != 0)
+        {
+            ItemsPerRowLg = 6;
+        }
+        
+        // If ItemsPerRowLg do not fit in the 12-part grid set to default
+        if (ItemsPerRowXl is < 1 or > 12 || 12 % ItemsPerRowXl != 0)
+        {
+            ItemsPerRowXl = 6;
+        }
+    }
+
+    private void SetGridDivider()
+    {
+        _gridDivider = 12 / ItemsPerRow;
+        _gridDividerMd = 12 / ItemsPerRowMd;
+        _gridDividerLg = 12 / ItemsPerRowLg;
+        _gridDividerXl = 12 / ItemsPerRowXl;
+    }
+}

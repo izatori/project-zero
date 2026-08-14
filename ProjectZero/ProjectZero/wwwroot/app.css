@@ -20,6 +20,12 @@ a, .btn-link {
     padding-top: 1.1rem;
 }
 
+.roboto-dark {
+    font-family: Arial, 'Segoe UI', sans-serif;
+    font-weight: 300;
+    color: #2b2f32;
+}
+
 h1:focus {
     outline: none;
 }
