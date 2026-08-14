@@ -20,6 +20,7 @@ public class ServiceCollectionExtensionsTests
 
         Assert.NotNull(provider.GetService<ApplicationDbContext>());
         Assert.NotNull(provider.GetService<IUserRepository>());
+        Assert.NotNull(provider.GetService<IProductRepository>());
         Assert.NotNull(provider.GetService<IUnitOfWork>());
         Assert.NotNull(provider.GetService<IDeleteMeUserDomainService>());
         Assert.NotNull(provider.GetService<IDeleteMeEmailDomainService>());
@@ -36,6 +37,7 @@ public class ServiceCollectionExtensionsTests
 
         Assert.NotNull(provider.GetService<ApplicationDbContext>());
         Assert.NotNull(provider.GetService<IUserRepository>());
+        Assert.NotNull(provider.GetService<IProductRepository>());
         Assert.NotNull(provider.GetService<IUnitOfWork>());
     }
 }

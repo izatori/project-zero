@@ -6,6 +6,6 @@ public record ProductDto(
     string FileName,
     double Price,
     string Description,
-    DateTime CreationDate,
-    DateTime? LastUpdateDate,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt,
     bool IsActive);
