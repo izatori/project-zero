@@ -1,0 +1,127 @@
+﻿using System.Text.RegularExpressions;
+using Core.Domain.Abstractions;
+
+namespace Core.Domain.Entities;
+
+public class Product : AggregateRoot<Guid>
+{
+    private Product(Guid id, string name, string fileName, double price, string description) : base(id)
+    {
+        Name = name;
+        FileName = fileName;
+        Price = Math.Round(price, 2);
+        Description = description;
+        CreatedAt = DateTime.UtcNow;
+        IsActive = true;
+    }
+    
+    public string Name { get; private set; }
+    
+    public string FileName { get; private set; }
+    
+    public double Price { get; private set; }
+    
+    public string? Description { get; private set; }
+    
+    public DateTime CreatedAt { get; private set; }
+    
+    public DateTime? UpdatedAt { get; private set; }
+    
+    public bool IsActive { get; private set; }
+
+    public static Product Create(string name, string fileName, double price, string description)
+    {
+        ValidateName(name);
+        ValidateFileName(fileName);
+        ValidatePrice(price);
+        
+        var product = new Product(Guid.NewGuid(), name, fileName, price, description);
+        
+        // TODO: prouct.RaiseDomainEvent(new ProductCreatedEvent(product.Id, name, fileName, price, description));
+        
+        return product;
+    }
+
+    public void Update(string? name, string? fileName, double? price, string? description)
+    {
+        if (name is null && fileName is null && price is null && description is null)
+            throw new ArgumentException("At least one property must be provided to update");
+
+        if (name is not null)
+        {
+            ValidateName(name);
+            Name = name;
+        }
+
+        if (fileName is not null)
+        {
+            ValidateFileName(fileName);
+            FileName = fileName.ToLower();
+        }
+
+        if (price is not null)
+        {
+            ValidatePrice(price.Value);
+            Price = Math.Round(price.Value, 2);
+        }
+
+        if (description is not null)
+            Description = description;
+
+        UpdatedAt = DateTime.UtcNow;
+        
+        // TODO: RaiseDomainEvent UpdateProductEvent
+    }
+
+    public void Delete()
+    {
+        if (IsActive)
+        {
+            return;
+        }
+        
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+        
+        // TODO: Raise DeaktivateEvent
+    }
+    private static void ValidateName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("Name cannot be empty", nameof(fileName));
+        }
+    }
+
+    private static void ValidateFileName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            throw new ArgumentException("File-Name cannot be empty", nameof(fileName));
+        }
+
+        if (!fileName.ToLower().EndsWith(".jpg") && !fileName.ToLower().EndsWith(".jpeg") 
+                                                 && !fileName.ToLower().EndsWith(".png"))
+        {
+            throw new ArgumentException("File-Name must end with '.jpg' or '.jpeg' or '.png'",  nameof(fileName));
+        }
+
+        if (fileName.Contains(' '))
+        {
+            throw new ArgumentException("File-Name cannot contain spaces", nameof(fileName));
+        }
+        
+        if (!Regex.IsMatch(fileName, "^[a-zA-Z0-9_-]+$"))
+        {
+            throw new ArgumentException("File-Name contains invalid characters. Must only contain letters, numbers, - and _", nameof(fileName));
+        }
+    }
+
+    private static void ValidatePrice(double price)
+    {
+        if (price < 0)
+        {
+            throw new ArgumentException("Price cannot be negative", nameof(price));
+        }
+    }
+}
