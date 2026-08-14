@@ -9,5 +9,5 @@ namespace Core.Domain.Repositories;
 /// </summary>
 public interface IProductRepository  : IRepository<Product, Guid>
 {
-    Task<List<Product>> GetAllActiveAsync(CancellationToken cancellationToken = default);
+    Task<List<Product>> GetAllActiveAsync(int? limit = null, CancellationToken cancellationToken = default);
 }

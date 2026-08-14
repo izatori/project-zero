@@ -35,10 +35,13 @@ public class ProductRepository : IProductRepository
          return await _context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<List<Product>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Product>> GetAllActiveAsync(int? limit = null, CancellationToken cancellationToken = default)
     {
-        return await _context.Products
-            .Where(p => p.IsActive)
-            .ToListAsync(cancellationToken);
+        var query = _context.Products.Where(p => p.IsActive);
+
+        if (limit is > 0)
+            query = query.Take(limit.Value);
+
+        return await query.ToListAsync(cancellationToken);
     }
 }

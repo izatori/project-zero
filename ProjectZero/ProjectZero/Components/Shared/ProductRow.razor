@@ -1,11 +1,15 @@
-﻿@implements IAsyncDisposable
+﻿@using Core.Application.DTOs
+@using Core.Application.Features.Products.GetProducts
+@using MediatR
+@implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
+@inject ISender Sender
 
 <div class="row">
-@for (int i = 0; i < _currentItemsPerRow; i++)
+@for (int i = 0; i < Math.Min(_currentItemsPerRow, _products.Count); i++)
     {
         <div class="col-@_gridDivider.ToString() col-md-@_gridDividerMd.ToString() col-lg-@_gridDividerLg.ToString() col-xl-@_gridDividerXl.ToString() p-3">
-            <ProductCard Name="Banana" FileName="banana.jpg" Description="@Description1"></ProductCard>
+            <ProductCard Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description"></ProductCard>
         </div>
     }
 </div>
@@ -19,12 +23,6 @@
     [Parameter] public int ItemsPerRowLg { get; set; } = 4;
     
     [Parameter] public int ItemsPerRowXl { get; set; } = 6;
-    
-    [Parameter] public string? Description1 { get; set; } = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minimum veniam";
-    
-    [Parameter] public string? Description2 { get; set; } = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt";
-    
-    [Parameter] public string? Description3 { get; set; } = "Lorem ipsum dolor sit amet";
 
     private int _gridDivider;
     
@@ -38,13 +36,18 @@
     
     private int _screenWidth;
     
+    private List<ProductDto> _products = new();
+    
     private DotNetObjectReference<ProductRow>? _dotNetRef;
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ValidateItemsPerRow();
         SetGridDivider();
         SetCurrentItemsPerRow();
+
+        _products = (await Sender.Send(new GetProductsQuery(_currentItemsPerRow))).ToList();
+        if (_products.Count < _currentItemsPerRow) _currentItemsPerRow = _products.Count;
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -57,10 +60,12 @@
     }
 
     [JSInvokable]
-    public void OnWindowResized(int width)
+    public async void OnWindowResized(int width)
     {
         _screenWidth = width;
         SetCurrentItemsPerRow();
+        _products = (await Sender.Send(new GetProductsQuery(_currentItemsPerRow))).ToList();
+        if (_products.Count < _currentItemsPerRow) _currentItemsPerRow = _products.Count;
         StateHasChanged();
     }
 

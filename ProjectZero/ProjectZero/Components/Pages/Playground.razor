@@ -1,5 +1,9 @@
 @page "/playground"
 @rendermode InteractiveServer
+@using Core.Application.Features.Products.CreateProduct
+@using System.ComponentModel.DataAnnotations
+@using MediatR
+@inject ISender Sender
 
 <PageTitle>Playground</PageTitle>
 
@@ -8,27 +12,71 @@
 <p>An empty page to experiment with.</p>
 
 <div class="container">
-    <ProductRow></ProductRow>
-    <div class="row">
-        <div class="col-md-4 border p-3">
-            Cell 4
+    @if (_showSuccess)
+    {
+        <div class="alert alert-success" role="alert">Product added successfully.</div>
+    }
+
+    <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="model.Name" />
+            <ValidationMessage For="@(() => model.Name)" />
         </div>
-        <div class="col-md-4 border p-3">
-            Cell 5
+
+        <div class="mb-3">
+            <label for="fileName" class="form-label">File name</label>
+            <InputText id="fileName" class="form-control" @bind-Value="model.FileName" />
+            <ValidationMessage For="@(() => model.FileName)" />
         </div>
-        <div class="col-md-4 border p-3">
-            Cell 6
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <InputTextArea id="description" class="form-control" @bind-Value="model.Description" />
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 border p-3">
-            Cell 7
+
+        <div class="mb-3">
+            <label for="price" class="form-label">Price</label>
+            <InputNumber id="price" class="form-control" @bind-Value="model.Price" />
+            <ValidationMessage For="@(() => model.Price)" />
         </div>
-        <div class="col-md-4 border p-3">
-            Cell 8
-        </div>
-        <div class="col-md-4 border p-3">
-            Cell 9
-        </div>
-    </div>
+
+        <button type="submit" class="btn btn-primary">Add Product</button>
+    </EditForm>
 </div>
+
+<div class="container">
+    <ProductRow></ProductRow>
+</div>
+
+@code {
+    private ProductFormModel model { get; set; } = new();
+    private bool _showSuccess;
+
+    private async Task HandleValidSubmit()
+    {
+        await Sender.Send(new CreateProductCommand(
+            model.Name,
+            model.FileName,
+            string.IsNullOrEmpty(model.Description) ? "" : model.Description,
+            model.Price));
+
+        model = new ProductFormModel();
+        _showSuccess = true;
+    }
+
+    private class ProductFormModel
+    {
+        [Required] public string Name { get; set; } = "";
+        [Required]
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png)$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg or .png")]
+        public string FileName { get; set; } = "";
+        public string? Description { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "Price cannot be negative")]
+        public double Price { get; set; }
+    }
+}
