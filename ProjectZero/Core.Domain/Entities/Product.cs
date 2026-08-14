@@ -3,8 +3,12 @@ using Core.Domain.Abstractions;
 
 namespace Core.Domain.Entities;
 
+/// <summary>
+/// Product aggregate root.
+/// </summary>
 public class Product : AggregateRoot<Guid>
 {
+    // Private constructor for EF and deserialization
     private Product(Guid id, string name, string fileName, double price, string description) : base(id)
     {
         Name = name;
@@ -29,6 +33,10 @@ public class Product : AggregateRoot<Guid>
     
     public bool IsActive { get; private set; }
 
+    /// <summary>
+    /// Factory method to create a new Product.
+    /// Contains all business logic for product creation.
+    /// </summary>
     public static Product Create(string name, string fileName, double price, string description)
     {
         ValidateName(name);
@@ -42,6 +50,9 @@ public class Product : AggregateRoot<Guid>
         return product;
     }
 
+    /// <summary>
+    /// Update product information.
+    /// </summary>
     public void Update(string? name, string? fileName, double? price, string? description)
     {
         if (name is null && fileName is null && price is null && description is null)
@@ -73,9 +84,12 @@ public class Product : AggregateRoot<Guid>
         // TODO: RaiseDomainEvent UpdateProductEvent
     }
 
+    /// <summary>
+    /// Deactivate the product.
+    /// </summary>
     public void Delete()
     {
-        if (IsActive)
+        if (!IsActive)
         {
             return;
         }
@@ -85,6 +99,9 @@ public class Product : AggregateRoot<Guid>
         
         // TODO: Raise DeaktivateEvent
     }
+    /// <summary>
+    /// Validates the product name.
+    /// </summary>
     private static void ValidateName(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -93,6 +110,9 @@ public class Product : AggregateRoot<Guid>
         }
     }
 
+    /// <summary>
+    /// Validates the file name.
+    /// </summary>
     private static void ValidateFileName(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -117,6 +137,9 @@ public class Product : AggregateRoot<Guid>
         }
     }
 
+    /// <summary>
+    /// Validates the product price.
+    /// </summary>
     private static void ValidatePrice(double price)
     {
         if (price < 0)
