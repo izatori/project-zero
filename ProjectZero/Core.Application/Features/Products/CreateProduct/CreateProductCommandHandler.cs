@@ -1,7 +1,7 @@
-﻿using Core.Application.Abstractions;
-using Core.Domain.Abstractions;
+﻿using Core.Domain.Abstractions;
 using Core.Domain.Entities;
 using Core.Domain.Repositories;
+using MediatR;
 
 namespace Core.Application.Features.Products.CreateProduct;
 
@@ -9,7 +9,7 @@ namespace Core.Application.Features.Products.CreateProduct;
 /// Handler for CreateProductCommand.
 /// Orchestrates domain logic and persistence.
 /// </summary>
-public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand, Guid>
+public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Guid>
 {
     private readonly IProductRepository _productRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -23,7 +23,7 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand,
     /// <summary>
     /// Handles the creation of a new product.
     /// </summary>
-    public async Task<Guid> HandleAsync(CreateProductCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid> Handle(CreateProductCommand command, CancellationToken cancellationToken = default)
     {
         // Create the domain entity (business logic is encapsulated in the entity)
         var product = Product.Create(command.Name, command.fileName, command.Price, command.Description);

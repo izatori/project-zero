@@ -2,6 +2,7 @@ using Core.Application.Abstractions;
 using Core.Domain.Abstractions;
 using Core.Domain.Entities;
 using Core.Domain.Repositories;
+using MediatR;
 
 namespace Core.Application.Features.Users.CreateUser;
 
@@ -9,7 +10,7 @@ namespace Core.Application.Features.Users.CreateUser;
 /// Handler for CreateUserCommand.
 /// Orchestrates domain logic and persistence.
 /// </summary>
-public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -23,7 +24,7 @@ public class CreateUserCommandHandler : ICommandHandler<CreateUserCommand, Guid>
     /// <summary>
     /// Handles the creation of a new user.
     /// </summary>
-    public async Task<Guid> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<Guid> Handle(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
         // Check if user with email already exists
         var existingUser = await _userRepository.GetByEmailAsync(command.Email, cancellationToken);

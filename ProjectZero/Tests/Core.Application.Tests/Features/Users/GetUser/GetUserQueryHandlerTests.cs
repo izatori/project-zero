@@ -20,7 +20,7 @@ public class GetUserQueryHandlerTests
         var handler = new GetUserQueryHandler(_userRepository.Object);
         var query = new GetUserQuery(user.Id);
 
-        var result = await handler.HandleAsync(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(user.Id, result!.Id);
@@ -37,7 +37,7 @@ public class GetUserQueryHandlerTests
         var handler = new GetUserQueryHandler(_userRepository.Object);
         var query = new GetUserQuery(Guid.NewGuid());
 
-        var result = await handler.HandleAsync(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
         Assert.Null(result);
     }

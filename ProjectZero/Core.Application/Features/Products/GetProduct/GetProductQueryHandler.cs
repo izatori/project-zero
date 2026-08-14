@@ -1,10 +1,10 @@
-﻿using Core.Application.Abstractions;
-using Core.Application.DTOs;
+﻿using Core.Application.DTOs;
 using Core.Domain.Repositories;
+using MediatR;
 
 namespace Core.Application.Features.Products.GetProduct;
 
-public class GetProductQueryHandler : IQueryHandler<GetProductQuery, ProductDto?>
+public class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductDto?>
 {
     private readonly IProductRepository _productRepository;
     
@@ -13,7 +13,7 @@ public class GetProductQueryHandler : IQueryHandler<GetProductQuery, ProductDto?
         _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
     }
     
-    public async Task<ProductDto?> HandleAsync(GetProductQuery query, CancellationToken cancellationToken = default)
+    public async Task<ProductDto?> Handle(GetProductQuery query, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetByIdAsync(query.ProductId, cancellationToken);
 

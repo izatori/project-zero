@@ -1,4 +1,4 @@
-﻿using Core.Application.Abstractions;
+﻿using MediatR;
 
 namespace Core.Application.Features.Products.CreateProduct;
 
@@ -6,4 +6,4 @@ namespace Core.Application.Features.Products.CreateProduct;
 /// Command to create a new product.
 /// Commands represent write operations in CQRS.
 /// </summary>
-public record CreateProductCommand(string Name, string fileName, string Description, double Price) : ICommand<Guid>;
+public record CreateProductCommand(string Name, string fileName, string Description, double Price) : IRequest<Guid>;

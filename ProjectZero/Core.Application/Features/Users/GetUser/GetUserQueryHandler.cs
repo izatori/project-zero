@@ -1,6 +1,6 @@
-using Core.Application.Abstractions;
 using Core.Application.DTOs;
 using Core.Domain.Repositories;
+using MediatR;
 
 namespace Core.Application.Features.Users.GetUser;
 
@@ -8,7 +8,7 @@ namespace Core.Application.Features.Users.GetUser;
 /// Handler for GetUserQuery.
 /// Retrieves and maps user data to DTO.
 /// </summary>
-public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDto?>
+public class GetUserQueryHandler : IRequestHandler<GetUserQuery, UserDto?>
 {
     private readonly IUserRepository _userRepository;
 
@@ -20,7 +20,7 @@ public class GetUserQueryHandler : IQueryHandler<GetUserQuery, UserDto?>
     /// <summary>
     /// Handles the retrieval of a user.
     /// </summary>
-    public async Task<UserDto?> HandleAsync(GetUserQuery query, CancellationToken cancellationToken = default)
+    public async Task<UserDto?> Handle(GetUserQuery query, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(query.UserId, cancellationToken);
 

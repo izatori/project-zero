@@ -22,7 +22,7 @@ public class CreateProductCommandHandlerTests
         var handler = CreateHandler();
         var command = new CreateProductCommand("Widget", "widget.jpg", "A handy widget", 19.99);
 
-        var productId = await handler.HandleAsync(command, CancellationToken.None);
+        var productId = await handler.Handle(command, CancellationToken.None);
 
         Assert.NotEqual(Guid.Empty, productId);
         _productRepository.Verify(
@@ -44,7 +44,7 @@ public class CreateProductCommandHandlerTests
         var handler = CreateHandler();
         var command = new CreateProductCommand("Widget", "widget.jpg", "A handy widget", 19.99);
 
-        await handler.HandleAsync(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None);
 
         Assert.NotNull(addedProduct);
         Assert.Equal("Widget", addedProduct!.Name);

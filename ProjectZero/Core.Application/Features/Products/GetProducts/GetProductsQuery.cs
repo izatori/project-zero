@@ -1,6 +1,6 @@
-﻿using Core.Application.Abstractions;
-using Core.Application.DTOs;
+﻿using Core.Application.DTOs;
+using MediatR;
 
 namespace Core.Application.Features.Products.GetProducts;
 
-public record GetProductsQuery() : IQuery<IEnumerable<ProductDto>>;
+public record GetProductsQuery() : IRequest<IEnumerable<ProductDto>>;

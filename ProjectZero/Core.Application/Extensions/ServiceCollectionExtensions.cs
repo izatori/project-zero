@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Application.Extensions;
@@ -15,9 +14,6 @@ public static class ServiceCollectionExtensions
     {
         // Register MediatR with handlers from this assembly
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly));
-
-        // Register the application mediator
-        services.AddScoped<Abstractions.IMediator, Mediator>();
 
         return services;
     }

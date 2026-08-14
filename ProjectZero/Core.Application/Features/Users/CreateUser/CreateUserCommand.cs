@@ -1,4 +1,4 @@
-using Core.Application.Abstractions;
+using MediatR;
 
 namespace Core.Application.Features.Users.CreateUser;
 
@@ -6,4 +6,4 @@ namespace Core.Application.Features.Users.CreateUser;
 /// Command to create a new user.
 /// Commands represent write operations in CQRS.
 /// </summary>
-public record CreateUserCommand(string Name, string Email) : ICommand<Guid>;
+public record CreateUserCommand(string Name, string Email) : IRequest<Guid>;

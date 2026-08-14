@@ -23,7 +23,7 @@ public class CreateUserCommandHandlerTests
         var handler = CreateHandler();
         var command = new CreateUserCommand("John Doe", "john@example.com");
 
-        var userId = await handler.HandleAsync(command, CancellationToken.None);
+        var userId = await handler.Handle(command, CancellationToken.None);
 
         Assert.NotEqual(Guid.Empty, userId);
         _userRepository.Verify(
@@ -46,7 +46,7 @@ public class CreateUserCommandHandlerTests
         var command = new CreateUserCommand("John Doe", "john@example.com");
 
         var exception =
-            await Assert.ThrowsAsync<ValidationException>(() => handler.HandleAsync(command, CancellationToken.None));
+            await Assert.ThrowsAsync<ValidationException>(() => handler.Handle(command, CancellationToken.None));
 
         Assert.True(exception.Errors.ContainsKey("Email"));
         _userRepository.Verify(
@@ -68,7 +68,7 @@ public class CreateUserCommandHandlerTests
         var handler = CreateHandler();
         var command = new CreateUserCommand("Jane Doe", "jane@example.com");
 
-        await handler.HandleAsync(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None);
 
         Assert.NotNull(addedUser);
         Assert.Equal("Jane Doe", addedUser!.Name);
