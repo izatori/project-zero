@@ -5,4 +5,7 @@ public record ProductDto(
     string Name,
     string FileName,
     double Price,
-    string Description);
+    string Description,
+    DateTime CreationDate,
+    DateTime LastUpdateDate,
+    bool IsActive);
