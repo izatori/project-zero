@@ -8,7 +8,7 @@
         <div class="product-card-image">
             <img src="/images/@FileName" alt="@FileName" class="card-img-top">
             <div class="product-card-overlay">
-                <button type="button" class="btn btn-primary btn-sm rounded-circle action-btn" aria-label="Edit product">
+                <button type="button" class="btn btn-primary btn-sm rounded-circle action-btn" @onclick="EditProduct" aria-label="Edit product">
                     <i class="bi bi-pencil"></i>
                 </button>
                 <button type="button" class="btn btn-danger btn-sm rounded-circle action-btn" @onclick="HandleDelete" aria-label="Delete product">
@@ -32,11 +32,18 @@
     [Parameter] public double Price { get; set; }
     
     [Parameter] public string? Description { get; set; }
+    
+    [Parameter] public EventCallback<Guid> OnEditProduct { get; set; }
 
     private async Task HandleDelete()
     {
         await Sender.Send(new DeleteProductCommand(ProductId));
         
         Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private async Task EditProduct()
+    {
+        await OnEditProduct.InvokeAsync(ProductId);
     }
 }

@@ -1,7 +1,10 @@
 ﻿@page "/product-creator"
 @rendermode InteractiveServer
 @using Core.Application.Features.Products.CreateProduct
+@using Core.Application.Features.Products.GetProduct
+@using Core.Application.Features.Products.UpdateProduct
 @using System.ComponentModel.DataAnnotations
+@using Core.Application.DTOs
 @using MediatR
 @inject ISender Sender
 @inject NavigationManager Navigation
@@ -93,15 +96,108 @@
                 <p class="text-muted small mb-0 mt-1">All products currently in the catalog.</p>
             </div>
             <div class="card-body">
-                <ProductRow></ProductRow>
+                <ProductRow OnEditProduct="HandleEditProduct"></ProductRow>
             </div>
         </div>
     </div>
 </div>
 
+@if (_showEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Product
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal" aria-label="Close"></button>
+                </div>
+                <EditForm Model="@_editModel" OnValidSubmit="HandleEditSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="edit-name" class="form-label fw-medium">Name</label>
+                                <InputText id="edit-name" class="form-control" @bind-Value="_editModel.Name" />
+                                <ValidationMessage For="@(() => _editModel.Name)" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="edit-fileName" class="form-label fw-medium">File name</label>
+                                <InputText id="edit-fileName" class="form-control" @bind-Value="_editModel.FileName" />
+                                <ValidationMessage For="@(() => _editModel.FileName)" />
+                            </div>
+
+                            <div class="col-12">
+                                <label for="edit-description" class="form-label fw-medium">Description</label>
+                                <InputTextArea id="edit-description" class="form-control" rows="4" @bind-Value="_editModel.Description" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="edit-price" class="form-label fw-medium">Price</label>
+                                <InputNumber id="edit-price" class="form-control" @bind-Value="_editModel.Price" />
+                                <ValidationMessage For="@(() => _editModel.Price)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            Save Changes
+                            <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     private ProductFormModel Model { get; set; } = new();
     private bool _showSuccess;
+
+    private ProductFormModel _editModel = new();
+    private Guid _editProductId;
+    private bool _showEditModal;
+
+    private async Task HandleEditProduct(Guid productId)
+    {
+        var product = await Sender.Send(new GetProductQuery(productId));
+        if (product is null) return;
+
+        _editProductId = product.Id;
+        _editModel.Name = product.Name;
+        _editModel.FileName = product.FileName;
+        _editModel.Description = product.Description;
+        _editModel.Price = product.Price;
+
+        _showEditModal = true;
+    }
+
+    private void CloseEditModal()
+    {
+        _showEditModal = false;
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        await Sender.Send(new UpdateProductCommand(
+            _editProductId,
+            _editModel.Name,
+            _editModel.FileName,
+            string.IsNullOrEmpty(_editModel.Description) ? "" : _editModel.Description,
+            _editModel.Price));
+
+        _showEditModal = false;
+
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
 
     private async Task HandleValidSubmit()
     {

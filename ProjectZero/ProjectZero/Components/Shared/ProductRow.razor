@@ -9,7 +9,7 @@
     @for (int i = 0; i < Math.Min(_currentItemsPerRow, _products.Count); i++)
     {
         <div class="col-@_gridDivider.ToString() col-md-@_gridDividerMd.ToString() col-lg-@_gridDividerLg.ToString() col-xl-@_gridDividerXl.ToString() p-3">
-            <ProductCard ProductId="@_products[i].Id" Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description"></ProductCard>
+            <ProductCard ProductId="@_products[i].Id" Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description" OnEditProduct="EditProduct"></ProductCard>
         </div>
     }
 </div>
@@ -23,6 +23,8 @@
     [Parameter] public int ItemsPerRowLg { get; set; } = 4;
     
     [Parameter] public int ItemsPerRowXl { get; set; } = 6;
+    
+    [Parameter] public EventCallback<Guid> OnEditProduct { get; set; }
 
     private int _gridDivider;
     
@@ -113,6 +115,11 @@
             await JsRunTime.InvokeVoidAsync("unregisterResizeHandler", _dotNetRef);
             _dotNetRef.Dispose();
         }
+    }
+
+    private async Task EditProduct(Guid  productId)
+    {
+        await OnEditProduct.InvokeAsync(productId);
     }
 
     private void ValidateItemsPerRow()
