@@ -58,6 +58,14 @@ public class ApplicationDbContext : DbContext
             builder.Property(g => g.ImageFileName).IsRequired().HasMaxLength(255);
             builder.Property(g => g.StrokeAnimationFileName).HasMaxLength(255);
             builder.Property(g => g.IsLearned).IsRequired();
+
+            builder.OwnsMany(g => g.Translations, t =>
+            {
+                t.WithOwner().HasForeignKey("GlyphId");
+                t.Property(x => x.JapaneseWriting).IsRequired().HasMaxLength(255);
+                t.Property(x => x.RomajiWriting).IsRequired().HasMaxLength(255);
+                t.Property(x => x.Translation).IsRequired().HasMaxLength(1023);
+            });
         });
     }
 }
