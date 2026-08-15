@@ -1,10 +1,17 @@
 ﻿@page "/hiragana"
 @rendermode InteractiveServer
+@using MediatR
+@inject NavigationManager Navigation
 
 <PageTitle>Learn Hiragana</PageTitle>
 
 <div class="playground-page py-4">
-    <div class="d-flex align-items-center mb-4">
+    <div class="position-relative">
+        <button type="button" class="btn btn-primary btn-sm position-absolute top-0 end-0 shadow-sm" @onclick="GoToGlyphCreator">
+            <i class="bi bi-plus-circle me-1"></i>New Character
+        </button>
+    </div>
+    <div class="d-flex align-items-center mb-4 mt-4">
         <div class="me-3 d-flex align-items-center justify-content-center default-page-icon">
             <i class="bi bi-translate"></i>
         </div>
@@ -16,5 +23,8 @@
 </div>
 
 @code {
-    
+    private void GoToGlyphCreator()
+    {
+        Navigation.NavigateTo("/glyph-creator");
+    }
 }

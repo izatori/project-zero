@@ -1,0 +1,149 @@
+﻿@page "/glyph-creator"
+@rendermode InteractiveServer
+@using Core.Application.Features.Glyphs.CreateGlyph
+@using Core.Domain.Enums
+@using System.ComponentModel.DataAnnotations
+@using MediatR
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<PageTitle>Create New Characters</PageTitle>
+
+<div class="playground-page py-4">
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-3 d-flex align-items-center justify-content-center playground-icon">
+            <i class="bi bi-translate"></i>
+        </div>
+        <div>
+            <h1 class="mb-0 fw-bold">Create New Characters</h1>
+            <p class="text-muted mb-0">Here new Hiragana, Katakana and Kanji Characters can be created.</p>
+        </div>
+    </div>
+
+    <div class="container px-0">
+        @if (_showSuccess)
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Character added successfully.</span>
+            </div>
+        }
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>Add New Character
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Fill in the details below to create a character.</p>
+            </div>
+
+            <div class="card-body">
+                <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="character" class="form-label fw-medium">Character</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-fonts"></i></span>
+                                <InputText id="character" class="form-control" placeholder="e.g. あ" @bind-Value="Model.Character" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.Character)" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="romaji" class="form-label fw-medium">Romaji</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                <InputText id="romaji" class="form-control" placeholder="e.g. a" @bind-Value="Model.Romaji" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.Romaji)" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="type" class="form-label fw-medium">Type</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-grid-1x2"></i></span>
+                                <select id="type" class="form-select" @bind="Model.Type">
+                                    @foreach (var type in Enum.GetValues<GlyphType>())
+                                    {
+                                        <option value="@type">@type</option>
+                                    }
+                                </select>
+                            </div>
+                            <ValidationMessage For="@(() => Model.Type)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="imageFileName" class="form-label fw-medium">Image file name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-file-earmark-image"></i></span>
+                                <InputText id="imageFileName" class="form-control" placeholder="e.g. hiragana_a.png" @bind-Value="Model.ImageFileName" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.ImageFileName)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="strokeAnimationFileName" class="form-label fw-medium">Stroke animation file name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-file-earmark-play"></i></span>
+                                <InputText id="strokeAnimationFileName" class="form-control" placeholder="e.g. hiragana_a.gif (optional)" @bind-Value="Model.StrokeAnimationFileName" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.StrokeAnimationFileName)" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            Add Character
+                            <i class="bi bi-arrow-bar-up me-1"></i>
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private GlyphFormModel Model { get; set; } = new();
+    private bool _showSuccess;
+
+    private async Task HandleValidSubmit()
+    {
+        await Sender.Send(new CreateGlyphCommand(
+            Model.Character,
+            Model.Romaji,
+            Model.Type,
+            Model.ImageFileName,
+            string.IsNullOrWhiteSpace(Model.StrokeAnimationFileName) ? null : Model.StrokeAnimationFileName));
+
+        Model = new GlyphFormModel();
+        _showSuccess = true;
+
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private class GlyphFormModel
+    {
+        [Required]
+        [MaxLength(4, ErrorMessage = "Character must be a single character")]
+        public string Character { get; set; } = "";
+
+        [Required]
+        public string Romaji { get; set; } = "";
+
+        [Required]
+        public GlyphType Type { get; set; }
+
+        [Required]
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png)$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg or .png")]
+        public string ImageFileName { get; set; } = "";
+
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.gif$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .gif")]
+        public string? StrokeAnimationFileName { get; set; }
+    }
+}
