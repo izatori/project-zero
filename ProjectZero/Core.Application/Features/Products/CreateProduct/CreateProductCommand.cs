@@ -6,4 +6,8 @@ namespace Core.Application.Features.Products.CreateProduct;
 /// Command to create a new product.
 /// Commands represent write operations in CQRS.
 /// </summary>
-public record CreateProductCommand(string Name, string fileName, string Description, double Price) : IRequest<Guid>;
+public record CreateProductCommand(
+    string Name, 
+    string FileName, 
+    string Description, 
+    double Price) : IRequest<Guid>;

@@ -26,7 +26,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
     public async Task<Guid> Handle(CreateProductCommand command, CancellationToken cancellationToken = default)
     {
         // Create the domain entity (business logic is encapsulated in the entity)
-        var product = Product.Create(command.Name, command.fileName, command.Price, command.Description);
+        var product = Product.Create(command.Name, command.FileName, command.Price, command.Description);
 
         // Persist the product
         await _productRepository.AddAsync(product, cancellationToken);
