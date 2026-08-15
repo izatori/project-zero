@@ -1,0 +1,131 @@
+﻿@page "/product-creator"
+@rendermode InteractiveServer
+@using Core.Application.Features.Products.CreateProduct
+@using System.ComponentModel.DataAnnotations
+@using MediatR
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<PageTitle>Product Creator</PageTitle>
+
+<div class="playground-page py-4">
+    <div class="d-flex align-items-center mb-4">
+        <div class="me-3 d-flex align-items-center justify-content-center playground-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+            <h1 class="mb-0 fw-bold">Product Store</h1>
+            <p class="text-muted mb-0">Create and manage your products.</p>
+        </div>
+    </div>
+
+    <div class="container px-0">
+        @if (_showSuccess)
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Product added successfully.</span>
+            </div>
+        }
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>Add New Product
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Fill in the details below to create a product.</p>
+            </div>
+
+            <div class="card-body">
+                <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label fw-medium">Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                <InputText id="name" class="form-control" placeholder="e.g. Golden Gate" @bind-Value="Model.Name" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.Name)" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="fileName" class="form-label fw-medium">File name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-file-earmark-image"></i></span>
+                                <InputText id="fileName" class="form-control" placeholder="e.g. photo.jpg" @bind-Value="Model.FileName" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.FileName)" />
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-medium">Description</label>
+                            <InputTextArea id="description" class="form-control" rows="4" placeholder="Optional product description" @bind-Value="Model.Description" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="price" class="form-label fw-medium">Price</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-currency-dollar"></i></span>
+                                <InputNumber id="price" class="form-control" @bind-Value="Model.Price" />
+                            </div>
+                            <ValidationMessage For="@(() => Model.Price)" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            Add Product
+                            <i class="bi bi-arrow-bar-up me-1"></i>
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-grid me-2 text-primary"></i>Products
+                </h5>
+                <p class="text-muted small mb-0 mt-1">All products currently in the catalog.</p>
+            </div>
+            <div class="card-body">
+                <ProductRow></ProductRow>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ProductFormModel Model { get; set; } = new();
+    private bool _showSuccess;
+
+    private async Task HandleValidSubmit()
+    {
+        await Sender.Send(new CreateProductCommand(
+            Model.Name,
+            Model.FileName,
+            string.IsNullOrEmpty(Model.Description) ? "" : Model.Description,
+            Model.Price));
+
+        Model = new ProductFormModel();
+        _showSuccess = true;
+
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private class ProductFormModel
+    {
+        [Required] public string Name { get; set; } = "";
+        [Required]
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png)$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg or .png")]
+        public string FileName { get; set; } = "";
+        public string? Description { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "Price cannot be negative")]
+        public double Price { get; set; }
+    }
+}

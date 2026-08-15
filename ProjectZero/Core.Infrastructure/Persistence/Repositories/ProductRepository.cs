@@ -37,7 +37,8 @@ public class ProductRepository : IProductRepository
 
     public async Task<List<Product>> GetAllActiveAsync(int? limit = null, CancellationToken cancellationToken = default)
     {
-        var query = _context.Products.Where(p => p.IsActive);
+        IQueryable<Product> query = _context.Products.Where(p => p.IsActive)
+            .OrderByDescending(p => p.CreatedAt);
 
         if (limit is > 0)
             query = query.Take(limit.Value);
