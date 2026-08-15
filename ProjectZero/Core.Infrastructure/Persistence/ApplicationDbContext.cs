@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
+    public DbSet<Glyph> Glyphs { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +46,18 @@ public class ApplicationDbContext : DbContext
             builder.Property(p => p.CreatedAt).IsRequired();
             builder.Property(p => p.UpdatedAt);
             builder.Property(p => p.IsActive).IsRequired();
+        });
+
+        // Glyph configuration
+        modelBuilder.Entity<Glyph>(builder =>
+        {
+            builder.HasKey(g => g.Id);
+            builder.Property(g => g.Character).IsRequired().HasMaxLength(4);
+            builder.Property(g => g.Romaji).IsRequired().HasMaxLength(255);
+            builder.Property(g => g.Type).IsRequired();
+            builder.Property(g => g.ImageFileName).IsRequired().HasMaxLength(255);
+            builder.Property(g => g.StrokeAnimationFileName).HasMaxLength(255);
+            builder.Property(g => g.IsLearned).IsRequired();
         });
     }
 }
