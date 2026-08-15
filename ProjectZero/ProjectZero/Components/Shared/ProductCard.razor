@@ -1,4 +1,9 @@
-﻿<div class="card h-100 border-0 product-card">
+﻿@using Core.Application.Features.Products.DeleteProduct
+@using MediatR
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<div class="card h-100 border-0 product-card">
     <div class="card-body">
         <div class="product-card-image">
             <img src="/images/@FileName" alt="@FileName" class="card-img-top">
@@ -6,7 +11,7 @@
                 <button type="button" class="btn btn-primary btn-sm rounded-circle action-btn" aria-label="Edit product">
                     <i class="bi bi-pencil"></i>
                 </button>
-                <button type="button" class="btn btn-danger btn-sm rounded-circle action-btn" aria-label="Delete product">
+                <button type="button" class="btn btn-danger btn-sm rounded-circle action-btn" @onclick="HandleDelete" aria-label="Delete product">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
@@ -18,6 +23,8 @@
 
 @code
 {
+    [Parameter] public Guid ProductId { get; set; }
+    
     [Parameter] public string? Name { get; set; }
     
     [Parameter] public string? FileName { get; set; }
@@ -25,4 +32,11 @@
     [Parameter] public double Price { get; set; }
     
     [Parameter] public string? Description { get; set; }
+
+    private async Task HandleDelete()
+    {
+        await Sender.Send(new DeleteProductCommand(ProductId));
+        
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
 }

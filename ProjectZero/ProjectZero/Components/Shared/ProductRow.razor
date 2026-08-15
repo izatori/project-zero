@@ -9,7 +9,7 @@
     @for (int i = 0; i < Math.Min(_currentItemsPerRow, _products.Count); i++)
     {
         <div class="col-@_gridDivider.ToString() col-md-@_gridDividerMd.ToString() col-lg-@_gridDividerLg.ToString() col-xl-@_gridDividerXl.ToString() p-3">
-            <ProductCard Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description"></ProductCard>
+            <ProductCard ProductId="@_products[i].Id" Name="@_products[i].Name" FileName="@_products[i].FileName" Description="@_products[i].Description"></ProductCard>
         </div>
     }
 </div>
