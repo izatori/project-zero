@@ -1,6 +1,10 @@
 ﻿@page "/hiragana"
 @rendermode InteractiveServer
+@using Core.Application.DTOs
+@using Core.Application.Features.Glyphs.GetGlyphs
+@using Core.Domain.Enums
 @using MediatR
+@inject ISender Sender
 @inject NavigationManager Navigation
 
 <PageTitle>Learn Hiragana</PageTitle>
@@ -20,9 +24,31 @@
             <p class="text-muted mb-0">Discover Hiragana and build a strong foundation for reading and understanding Japanese.</p>
         </div>
     </div>
+
+    <div class="container px-0">
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-4">
+            @foreach (var glyph in _glyphs)
+            {
+                <div class="col">
+                    <GlyphCard Id="@glyph.Id"
+                               Character="@glyph.Character"
+                               Romaji="@glyph.Romaji"
+                               ImageFileName="@glyph.ImageFileName"
+                               StrokeAnimationFileName="@glyph.StrokeAnimationFileName"></GlyphCard>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @code {
+    private List<GlyphDto> _glyphs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _glyphs = (await Sender.Send(new GetActiveGlyphsQuery(GlyphType.Hiragana))).ToList();
+    }
+
     private void GoToGlyphCreator()
     {
         Navigation.NavigateTo("/glyph-creator");

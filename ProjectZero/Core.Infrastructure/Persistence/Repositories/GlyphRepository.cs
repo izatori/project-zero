@@ -1,4 +1,5 @@
 ﻿using Core.Domain.Entities;
+using Core.Domain.Enums;
 using Core.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,11 +53,12 @@ public class GlyphRepository : IGlyphRepository
     }
 
     /// <summary>
-    /// Retrieves all glyphs ordered by character.
+    /// Retrieves glyphs of the given type that have not yet been learned, ordered by character.
     /// </summary>
-    public async Task<List<Glyph>> GetAllActiveAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Glyph>> GetActiveByTypeAsync(GlyphType glyphType, CancellationToken cancellationToken = default)
     {
         return await _context.Glyphs
+            .Where(g => g.Type == glyphType && !g.IsLearned)
             .OrderBy(g => g.Character)
             .ToListAsync(cancellationToken);
     }

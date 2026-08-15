@@ -138,8 +138,8 @@
         public GlyphType Type { get; set; }
 
         [Required]
-        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png)$",
-            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg or .png")]
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png|webp)$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg, .png or .webp")]
         public string ImageFileName { get; set; } = "";
 
         [RegularExpression(@"^[a-zA-Z0-9_-]+\.gif$",

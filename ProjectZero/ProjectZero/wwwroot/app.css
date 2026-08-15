@@ -207,3 +207,59 @@ pre {
     background: #d1e7dd;
     color: #0f5132;
 }
+
+/* Glyph flip card */
+
+.glyph-card {
+    perspective: 1000px;
+    cursor: pointer;
+    width: 100%;
+    max-width: 220px;
+    height: 260px;
+    margin: 0 auto;
+}
+
+.glyph-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+}
+
+.glyph-card.is-flipped .glyph-card-inner {
+    transform: rotateY(180deg);
+}
+
+.glyph-card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.glyph-card-back {
+    transform: rotateY(180deg);
+}
+
+.glyph-card-image {
+    display: block;
+    width: 100%;
+    max-height: 160px;
+    object-fit: contain;
+}
+
+.glyph-card-title {
+    font-size: 3rem;
+    text-align: center;
+    margin: 0.5rem 0 0;
+    line-height: 1;
+}

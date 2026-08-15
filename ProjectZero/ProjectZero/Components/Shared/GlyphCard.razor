@@ -1,0 +1,31 @@
+﻿<div class="glyph-card @(_flipped ? "is-flipped" : "")" @onclick="ToggleFlip">
+    <div class="glyph-card-inner">
+        <div class="glyph-card-face glyph-card-front">
+            <img src="/images/glyphs/hiragana/@ImageFileName" alt="@Character" class="glyph-card-image">
+            <h1 class="glyph-card-title">@Character</h1>
+        </div>
+        <div class="glyph-card-face glyph-card-back">
+            <img src="/images/glyphs/hiragana/@(StrokeAnimationFileName ?? ImageFileName)" alt="@Romaji" class="glyph-card-image">
+            <h1 class="glyph-card-title">@Romaji</h1>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    [Parameter] public string Character { get; set; } = "";
+
+    [Parameter] public string Romaji { get; set; } = "";
+
+    [Parameter] public string ImageFileName { get; set; } = "";
+
+    [Parameter] public string? StrokeAnimationFileName { get; set; }
+
+    private bool _flipped;
+
+    private void ToggleFlip()
+    {
+        _flipped = !_flipped;
+    }
+}

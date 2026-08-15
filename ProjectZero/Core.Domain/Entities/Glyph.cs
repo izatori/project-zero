@@ -130,8 +130,8 @@ public class Glyph : AggregateRoot<Guid>
         if (imageFileName.Contains(' '))
             throw new ArgumentException("Image file name cannot contain spaces", nameof(imageFileName));
 
-        if (!Regex.IsMatch(imageFileName, @"^[a-zA-Z0-9_-]+\.(jpe?g|png)$", RegexOptions.IgnoreCase))
-            throw new ArgumentException("Image file name must only contain letters, numbers, - and _ followed by .jpg, .jpeg or .png", nameof(imageFileName));
+        if (!Regex.IsMatch(imageFileName, @"^[a-zA-Z0-9_-]+\.(jpe?g|png|webp)$", RegexOptions.IgnoreCase))
+            throw new ArgumentException("Image file name must only contain letters, numbers, - and _ followed by .jpg, .jpeg, .png or .webp", nameof(imageFileName));
     }
 
     /// <summary>
