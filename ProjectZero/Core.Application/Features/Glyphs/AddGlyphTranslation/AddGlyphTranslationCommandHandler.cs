@@ -20,7 +20,7 @@ public class AddGlyphTranslationCommandHandler : IRequestHandler<AddGlyphTransla
         var glyph = await _glyphRepository.GetByIdAsync(command.GlyphId, cancellationToken)
             ?? throw new KeyNotFoundException($"Glyph '{command.GlyphId}' was not found.");
 
-        glyph.AddTranslation(command.JapaneseWriting, command.RomajiWriting, command.Translation);
+        glyph.AddTranslation(command.JapaneseWriting, command.RomajiWriting, command.Translation, command.ImageFileName);
 
         await _glyphRepository.UpdateAsync(glyph, cancellationToken);
 

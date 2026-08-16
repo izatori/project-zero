@@ -76,7 +76,7 @@ public class Glyph : AggregateRoot<Guid>
     /// <summary>
     /// Adds a translation example to the glyph.
     /// </summary>
-    public void AddTranslation(string japaneseWriting, string romajiWriting, string translation)
+    public void AddTranslation(string japaneseWriting, string romajiWriting, string translation, string? imageFileName = null)
     {
         if (string.IsNullOrWhiteSpace(japaneseWriting))
             throw new ArgumentException("Japanese writing cannot be empty", nameof(japaneseWriting));
@@ -87,7 +87,7 @@ public class Glyph : AggregateRoot<Guid>
         if (string.IsNullOrWhiteSpace(translation))
             throw new ArgumentException("Translation cannot be empty", nameof(translation));
 
-        _translations.Add(new GlyphTranslation(japaneseWriting, romajiWriting, translation));
+        _translations.Add(new GlyphTranslation(japaneseWriting, romajiWriting, translation, imageFileName));
     }
 
     /// <summary>
@@ -191,11 +191,12 @@ public class Glyph : AggregateRoot<Guid>
 /// </summary>
 public class GlyphTranslation : ValueObject
 {
-    public GlyphTranslation(string japaneseWriting, string romajiWriting, string translation)
+    public GlyphTranslation(string japaneseWriting, string romajiWriting, string translation, string? imageFileName = null)
     {
         JapaneseWriting = japaneseWriting;
         RomajiWriting = romajiWriting;
         Translation = translation;
+        ImageFileName = imageFileName;
     }
 
     public string JapaneseWriting { get; }
@@ -203,6 +204,8 @@ public class GlyphTranslation : ValueObject
     public string RomajiWriting { get; }
 
     public string Translation { get; }
+
+    public string? ImageFileName { get; }
 
     public override IEnumerable<object> GetEqualityComponents()
     {

@@ -6,4 +6,5 @@ public record AddGlyphTranslationCommand(
     Guid GlyphId,
     string JapaneseWriting,
     string RomajiWriting,
-    string Translation) : IRequest;
+    string Translation,
+    string? ImageFileName = null) : IRequest;

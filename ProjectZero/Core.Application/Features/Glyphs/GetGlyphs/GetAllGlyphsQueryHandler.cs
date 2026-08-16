@@ -32,6 +32,7 @@ public class GetAllGlyphsQueryHandler : IRequestHandler<GetAllGlyphsQuery, IEnum
             g.Translations.Select(t => new GlyphTranslationDto(
                 t.JapaneseWriting,
                 t.RomajiWriting,
-                t.Translation)).ToList()));
+                t.Translation,
+                t.ImageFileName)).ToList()));
     }
 }

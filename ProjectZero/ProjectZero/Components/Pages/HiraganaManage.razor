@@ -12,6 +12,7 @@
 @using MediatR
 @inject ISender Sender
 @inject NavigationManager Navigation
+@inject IWebHostEnvironment Env
 
 <PageTitle>Manage Hiragana</PageTitle>
 
@@ -255,18 +256,24 @@
                             @foreach (var t in _editGlyph!.Translations)
                             {
                                 <li class="list-group-item px-0">
-<div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(t.ImageFileName))
+                                            {
+                                                <img src="/images/translations/@t.ImageFileName" alt="@t.JapaneseWriting" class="translation-thumb mb-1" />
+                                            }
                                             <div>
                                                 <span class="fw-medium">@t.JapaneseWriting</span>
                                                 <span class="text-muted small ms-2">@t.RomajiWriting</span>
                                                 <div class="text-muted small">@t.Translation</div>
                                             </div>
-                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2"
-                                                    title="Delete translation"
-                                                    @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
                                         </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                                                title="Delete translation"
+                                                @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </li>
                             }
                         </ul>
@@ -283,6 +290,20 @@
                             </div>
                             <div class="col-md-4">
                                 <input class="form-control" placeholder="Translation (e.g. blue)" @bind="TranslationModel.Translation" />
+                            </div>
+                        </div>
+                        <div class="row g-2 mt-2">
+                            <div class="col-md-8">
+                                <label class="form-label fw-medium mb-1 d-block">Image (optional)</label>
+                                <InputFile class="form-control" accept="image/jpeg,image/png,image/webp" OnChange="OnTranslationImageSelected" />
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                @if (!string.IsNullOrEmpty(_translationImageName))
+                                {
+                                    <span class="text-muted small d-inline-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill text-success me-1"></i>@_translationImageName
+                                    </span>
+                                }
                             </div>
                         </div>
                         <div class="d-flex justify-content-end mt-2">
@@ -351,6 +372,8 @@
     private bool _actionIsError;
     private string _actionSuccessMessage = "";
 
+    private string _translationImageName = "";
+
     protected override async Task OnInitializedAsync()
     {
         await LoadGlyphs();
@@ -402,6 +425,7 @@
             StrokeAnimationFileName = _editGlyph.StrokeAnimationFileName
         };
         TranslationModel = new TranslationFormModel();
+        _translationImageName = "";
 
         _showEditModal = true;
     }
@@ -442,16 +466,66 @@
     {
         if (_editGlyphId == Guid.Empty) return;
 
-        await Sender.Send(new AddGlyphTranslationCommand(
-            _editGlyphId,
-            TranslationModel.JapaneseWriting,
-            TranslationModel.RomajiWriting,
-            TranslationModel.Translation));
+        try
+        {
+            await Sender.Send(new AddGlyphTranslationCommand(
+                _editGlyphId,
+                TranslationModel.JapaneseWriting,
+                TranslationModel.RomajiWriting,
+                TranslationModel.Translation,
+                string.IsNullOrWhiteSpace(_translationImageName) ? null : _translationImageName));
 
-        TranslationModel = new TranslationFormModel();
+            TranslationModel = new TranslationFormModel();
+            _translationImageName = "";
 
-        await LoadGlyphs();
-        _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+            await LoadGlyphs();
+            _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to add translation: " + ex.Message;
+        }
+    }
+
+    private async Task OnTranslationImageSelected(InputFileChangeEventArgs e)
+    {
+        _translationImageName = "";
+        var file = e.File;
+        if (file is null)
+        {
+            return;
+        }
+
+        var ext = Path.GetExtension(file.Name);
+        if (!string.Equals(ext, ".jpg", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".jpeg", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".png", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(ext, ".webp", StringComparison.OrdinalIgnoreCase))
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Image must be a .jpg, .jpeg, .png or .webp file.";
+            return;
+        }
+
+        var fileName = $"{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
+        var uploadDir = Path.Combine(Env.WebRootPath, "images", "translations");
+        Directory.CreateDirectory(uploadDir);
+
+        try
+        {
+            await using var fs = new FileStream(Path.Combine(uploadDir, fileName), FileMode.Create);
+            await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(fs);
+            _translationImageName = fileName;
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to save image: " + ex.Message;
+        }
     }
 
     private async Task HandleRemoveTranslation(string japaneseWriting, string romajiWriting, string translation)

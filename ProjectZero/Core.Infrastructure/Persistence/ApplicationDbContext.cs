@@ -65,6 +65,7 @@ public class ApplicationDbContext : DbContext
                 t.Property(x => x.JapaneseWriting).IsRequired().HasMaxLength(255);
                 t.Property(x => x.RomajiWriting).IsRequired().HasMaxLength(255);
                 t.Property(x => x.Translation).IsRequired().HasMaxLength(1023);
+                t.Property(x => x.ImageFileName).HasMaxLength(255);
             });
         });
     }
