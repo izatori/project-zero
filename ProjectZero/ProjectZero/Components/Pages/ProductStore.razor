@@ -40,7 +40,7 @@
             </div>
 
             <div class="card-body">
-                <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+                <EditForm Model="@Model" FormName="create-product" OnValidSubmit="HandleValidSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger mb-3" />
 
@@ -113,7 +113,7 @@
                     </h5>
                     <button type="button" class="btn-close" @onclick="CloseEditModal" aria-label="Close"></button>
                 </div>
-                <EditForm Model="@_editModel" OnValidSubmit="HandleEditSubmit">
+                <EditForm Model="@_editModel" FormName="edit-product" OnValidSubmit="HandleEditSubmit">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger mb-3" />
 

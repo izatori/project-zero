@@ -1,0 +1,15 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<div class="hiragana-subnav mb-4">
+    <nav class="nav">
+        <NavLink class="subnav-link" Match="NavLinkMatch.All" href="/hiragana">
+            <i class="bi bi-compass me-2"></i>Discover
+        </NavLink>
+        <NavLink class="subnav-link" Match="NavLinkMatch.Prefix" href="/hiragana/learn">
+            <i class="bi bi-journal-bookmark me-2"></i>Learn
+        </NavLink>
+        <NavLink class="subnav-link" Match="NavLinkMatch.Prefix" href="/hiragana/manage">
+            <i class="bi bi-sliders me-2"></i>Manage
+        </NavLink>
+    </nav>
+</div>

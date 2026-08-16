@@ -62,4 +62,15 @@ public class GlyphRepository : IGlyphRepository
             .OrderBy(g => g.Character)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Retrieves all glyphs of the given type, ordered by character.
+    /// </summary>
+    public async Task<List<Glyph>> GetByTypeAsync(GlyphType glyphType, CancellationToken cancellationToken = default)
+    {
+        return await _context.Glyphs
+            .Where(g => g.Type == glyphType)
+            .OrderBy(g => g.Character)
+            .ToListAsync(cancellationToken);
+    }
 }

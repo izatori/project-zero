@@ -288,3 +288,55 @@ pre {
     font-size: 24px;
     box-shadow: 0 6px 16px rgba(13, 110, 253, 0.25);
 }
+
+/* Hiragana sub-navigation */
+
+.hiragana-subnav {
+    display: inline-flex;
+    background: #fff;
+    border-radius: 14px;
+    padding: .5rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.hiragana-subnav .nav {
+    gap: .25rem;
+}
+
+.subnav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: .6rem 1.3rem;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #495057;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.subnav-link:hover {
+    background: #f1f3f5;
+    color: #0d6efd;
+}
+
+.subnav-link.active {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+/* Manage page */
+
+.manage-char {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f1f3f5;
+    color: #212529;
+    font-size: 1.5rem;
+    font-weight: 600;
+}

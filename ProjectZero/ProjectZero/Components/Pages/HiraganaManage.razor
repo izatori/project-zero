@@ -1,0 +1,507 @@
+@page "/hiragana/manage"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using Core.Application.DTOs
+@using Core.Application.Features.Glyphs.CreateGlyph
+@using Core.Application.Features.Glyphs.UpdateGlyph
+@using Core.Application.Features.Glyphs.DeleteGlyph
+@using Core.Application.Features.Glyphs.AddGlyphTranslation
+@using Core.Application.Features.Glyphs.GetGlyphs
+@using Core.Domain.Enums
+@using System.ComponentModel.DataAnnotations
+@using MediatR
+@inject ISender Sender
+@inject NavigationManager Navigation
+
+<PageTitle>Manage Hiragana</PageTitle>
+
+<div class="playground-page py-4">
+    <HiraganaNav />
+    <div class="d-flex align-items-center mb-4 mt-2">
+        <div class="me-3 d-flex align-items-center justify-content-center default-page-icon">
+            <i class="bi bi-sliders p-3"></i>
+        </div>
+        <div>
+            <h1 class="mb-0 fw-bold">Manage Characters</h1>
+            <p class="text-muted mb-0">Create, edit and delete Hiragana characters and their translation examples.</p>
+        </div>
+    </div>
+
+    <div class="container px-0">
+        @if (_showCreateSuccess)
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>Character added successfully.</span>
+            </div>
+        }
+
+        @if (_showActionSuccess)
+        {
+            @if (_actionIsError)
+            {
+                <div class="alert alert-danger d-flex align-items-center shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span>@_actionSuccessMessage</span>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success d-flex align-items-center shadow-sm" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span>@_actionSuccessMessage</span>
+                </div>
+            }
+        }
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>Add New Character
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Fill in the details below to create a character.</p>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="character" class="form-label fw-medium">Character</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-fonts"></i></span>
+                            <input id="character" class="form-control" placeholder="e.g. あ" @bind="CreateModel.Character" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="romaji" class="form-label fw-medium">Romaji</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-type"></i></span>
+                            <input id="romaji" class="form-control" placeholder="e.g. a" @bind="CreateModel.Romaji" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="type" class="form-label fw-medium">Type</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-grid-1x2"></i></span>
+                            <select id="type" class="form-select" @bind="CreateModel.Type">
+                                @foreach (var type in Enum.GetValues<GlyphType>())
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="imageFileName" class="form-label fw-medium">Image file name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-file-earmark-image"></i></span>
+                            <input id="imageFileName" class="form-control" placeholder="e.g. hiragana_a.png" @bind="CreateModel.ImageFileName" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="strokeAnimationFileName" class="form-label fw-medium">Stroke animation file name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-file-earmark-play"></i></span>
+                            <input id="strokeAnimationFileName" class="form-control" placeholder="e.g. hiragana_a.gif (optional)" @bind="CreateModel.StrokeAnimationFileName" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-primary px-4" @onclick="HandleCreateSubmit">
+                        Add Character
+                        <i class="bi bi-arrow-bar-up me-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 class="card-title fw-semibold mb-0">
+                        <i class="bi bi-grid me-2 text-primary"></i>Characters
+                    </h5>
+                    <p class="text-muted small mb-0 mt-1">All characters currently in the catalog.</p>
+                </div>
+                <span class="badge text-bg-primary-subtle">@_glyphs.Count total</span>
+            </div>
+            <div class="card-body">
+                @if (_glyphs.Count == 0)
+                {
+                    <p class="text-muted text-center py-4 mb-0">No characters yet. Add your first one above.</p>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Character</th>
+                                    <th scope="col">Romaji</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Translations</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var glyph in _glyphs)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <span class="manage-char me-2">@glyph.Character</span>
+                                                <span class="text-muted small">@glyph.ImageFileName</span>
+                                            </div>
+                                        </td>
+                                        <td>@glyph.Romaji</td>
+                                        <td><span class="badge text-bg-light">@glyph.Type</span></td>
+                                        <td>
+                                            @if (glyph.Translations.Count == 0)
+                                            {
+                                                <span class="text-muted small">None</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge text-bg-secondary">@glyph.Translations.Count</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (glyph.IsLearned)
+                                            {
+                                                <span class="badge text-bg-success">Learned</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge text-bg-warning">Active</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(glyph.Id)">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => OpenDeleteModal(glyph.Id)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (_showEditModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Character
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Character</label>
+                            <input class="form-control" @bind="EditModel.Character" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Romaji</label>
+                            <input class="form-control" @bind="EditModel.Romaji" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Type</label>
+                            <select class="form-select" @bind="EditModel.Type">
+                                @foreach (var type in Enum.GetValues<GlyphType>())
+                                {
+                                    <option value="@type">@type</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Image file name</label>
+                            <input class="form-control" @bind="EditModel.ImageFileName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Stroke animation file name</label>
+                            <input class="form-control" placeholder="optional" @bind="EditModel.StrokeAnimationFileName" />
+                        </div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <h6 class="fw-semibold mb-2">
+                        <i class="bi bi-translate me-2 text-primary"></i>Translation Examples
+                    </h6>
+
+                    @if (_editGlyph is null || _editGlyph.Translations.Count == 0)
+                    {
+                        <p class="text-muted small mb-3">No translation examples yet.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var t in _editGlyph!.Translations)
+                            {
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <span class="fw-medium">@t.JapaneseWriting</span>
+                                            <span class="text-muted small ms-2">@t.RomajiWriting</span>
+                                            <div class="text-muted small">@t.Translation</div>
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+
+                    <div class="border rounded-3 p-3 bg-light-subtle">
+                        <label class="form-label fw-medium mb-2">Add a translation example</label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input class="form-control" placeholder="Japanese (e.g. あおい)" @bind="TranslationModel.JapaneseWriting" />
+                            </div>
+                            <div class="col-md-4">
+                                <input class="form-control" placeholder="Romaji (e.g. aoi)" @bind="TranslationModel.RomajiWriting" />
+                            </div>
+                            <div class="col-md-4">
+                                <input class="form-control" placeholder="Translation (e.g. blue)" @bind="TranslationModel.Translation" />
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="HandleAddTranslation">
+                                <i class="bi bi-plus-lg me-1"></i>Add Translation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="HandleEditSubmit">
+                        Save Changes
+                        <i class="bi bi-check-lg ms-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@if (_showDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="bi bi-exclamation-triangle me-2 text-danger"></i>Delete Character
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete the character <strong>@_deleteGlyphCharacter</strong> (@_deleteGlyphRomaji)? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<GlyphDto> _glyphs = new();
+    private GlyphFormModel CreateModel { get; set; } = new();
+    private GlyphFormModel EditModel { get; set; } = new();
+    private TranslationFormModel TranslationModel { get; set; } = new();
+
+    private GlyphDto? _editGlyph;
+    private Guid _editGlyphId;
+    private bool _showEditModal;
+
+    private bool _showDeleteModal;
+    private Guid _deleteGlyphId;
+    private string _deleteGlyphCharacter = "";
+    private string _deleteGlyphRomaji = "";
+
+    private bool _showCreateSuccess;
+    private bool _showActionSuccess;
+    private bool _actionIsError;
+    private string _actionSuccessMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGlyphs();
+    }
+
+    private async Task LoadGlyphs()
+    {
+        _glyphs = (await Sender.Send(new GetAllGlyphsQuery(GlyphType.Hiragana))).ToList();
+    }
+
+    private async Task HandleCreateSubmit()
+    {
+        try
+        {
+            await Sender.Send(new CreateGlyphCommand(
+                CreateModel.Character,
+                CreateModel.Romaji,
+                CreateModel.Type,
+                CreateModel.ImageFileName,
+                string.IsNullOrWhiteSpace(CreateModel.StrokeAnimationFileName) ? null : CreateModel.StrokeAnimationFileName));
+
+            CreateModel = new GlyphFormModel();
+            _showCreateSuccess = true;
+            _showActionSuccess = false;
+
+            await LoadGlyphs();
+        }
+        catch (Exception ex)
+        {
+            _showCreateSuccess = false;
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to add character: " + ex.Message;
+        }
+    }
+
+    private async Task OpenEditModal(Guid glyphId)
+    {
+        _editGlyph = _glyphs.FirstOrDefault(g => g.Id == glyphId);
+        if (_editGlyph is null) return;
+
+        _editGlyphId = glyphId;
+        EditModel = new GlyphFormModel
+        {
+            Character = _editGlyph.Character,
+            Romaji = _editGlyph.Romaji,
+            Type = _editGlyph.Type,
+            ImageFileName = _editGlyph.ImageFileName,
+            StrokeAnimationFileName = _editGlyph.StrokeAnimationFileName
+        };
+        TranslationModel = new TranslationFormModel();
+
+        _showEditModal = true;
+    }
+
+    private void CloseEditModal()
+    {
+        _showEditModal = false;
+    }
+
+    private async Task HandleEditSubmit()
+    {
+        try
+        {
+            await Sender.Send(new UpdateGlyphCommand(
+                _editGlyphId,
+                EditModel.Character,
+                EditModel.Romaji,
+                EditModel.Type,
+                EditModel.ImageFileName,
+                string.IsNullOrWhiteSpace(EditModel.StrokeAnimationFileName) ? null : EditModel.StrokeAnimationFileName));
+
+            _showEditModal = false;
+            _showActionSuccess = true;
+            _actionIsError = false;
+            _actionSuccessMessage = "Character updated successfully.";
+
+            await LoadGlyphs();
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to update character: " + ex.Message;
+        }
+    }
+
+    private async Task HandleAddTranslation()
+    {
+        if (_editGlyphId == Guid.Empty) return;
+
+        await Sender.Send(new AddGlyphTranslationCommand(
+            _editGlyphId,
+            TranslationModel.JapaneseWriting,
+            TranslationModel.RomajiWriting,
+            TranslationModel.Translation));
+
+        TranslationModel = new TranslationFormModel();
+
+        await LoadGlyphs();
+        _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+    }
+
+    private void OpenDeleteModal(Guid glyphId)
+    {
+        var glyph = _glyphs.FirstOrDefault(g => g.Id == glyphId);
+        if (glyph is null) return;
+
+        _deleteGlyphId = glyphId;
+        _deleteGlyphCharacter = glyph.Character;
+        _deleteGlyphRomaji = glyph.Romaji;
+        _showDeleteModal = true;
+    }
+
+    private void CloseDeleteModal()
+    {
+        _showDeleteModal = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        await Sender.Send(new DeleteGlyphCommand(_deleteGlyphId));
+
+        _showDeleteModal = false;
+        _showActionSuccess = true;
+        _actionIsError = false;
+        _actionSuccessMessage = "Character deleted successfully.";
+
+        await LoadGlyphs();
+    }
+
+    private class GlyphFormModel
+    {
+        [Required]
+        [MaxLength(3, ErrorMessage = "Character must contain between 1 and 3 characters")]
+        public string Character { get; set; } = "";
+
+        [Required]
+        public string Romaji { get; set; } = "";
+
+        [Required]
+        public GlyphType Type { get; set; }
+
+        [Required]
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.(jpe?g|png|webp)$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .jpg, .jpeg, .png or .webp")]
+        public string ImageFileName { get; set; } = "";
+
+        [RegularExpression(@"^[a-zA-Z0-9_-]+\.gif$",
+            ErrorMessage = "Must be letters/numbers/-/_ followed by .gif")]
+        public string? StrokeAnimationFileName { get; set; }
+    }
+
+    private class TranslationFormModel
+    {
+        public string JapaneseWriting { get; set; } = "";
+        public string RomajiWriting { get; set; } = "";
+        public string Translation { get; set; } = "";
+    }
+}

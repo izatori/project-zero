@@ -56,6 +56,24 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Updates the character information of the glyph.
+    /// Contains the business logic for glyph updates.
+    /// </summary>
+    public void Update(string character, string romaji, GlyphType type, string imageFileName, string? strokeAnimationFileName)
+    {
+        ValidateCharacter(character);
+        ValidateRomaji(romaji);
+        ValidateImageFileName(imageFileName);
+        ValidateStrokeAnimationFileName(strokeAnimationFileName);
+
+        Character = character;
+        Romaji = romaji;
+        Type = type;
+        ImageFileName = imageFileName;
+        StrokeAnimationFileName = strokeAnimationFileName;
+    }
+
+    /// <summary>
     /// Adds a translation example to the glyph.
     /// </summary>
     public void AddTranslation(string japaneseWriting, string romajiWriting, string translation)
@@ -96,18 +114,20 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
-    /// Validates that the character is a single character.
+    /// Validates that the character consists of one or more Hiragana/Katakana characters
+    /// (single characters such as あ or compound syllables such as きゃ).
     /// </summary>
     private static void ValidateCharacter(string character)
     {
         if (string.IsNullOrWhiteSpace(character))
             throw new ArgumentException("Character cannot be empty", nameof(character));
 
-        if (Rune.DecodeFromUtf16(character, out _, out var consumed) != System.Buffers.OperationStatus.Done
-            || consumed != character.Length)
-        {
-            throw new ArgumentException("Character must be a single character", nameof(character));
-        }
+        var length = Rune.DecodeFromUtf16(character, out _, out var consumed) == System.Buffers.OperationStatus.Done
+            ? consumed
+            : character.Length;
+
+        if (length is < 1 or > 3)
+            throw new ArgumentException("Character must contain between 1 and 3 characters", nameof(character));
     }
 
     /// <summary>
