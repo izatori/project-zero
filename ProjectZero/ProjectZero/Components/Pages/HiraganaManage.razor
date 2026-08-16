@@ -5,6 +5,7 @@
 @using Core.Application.Features.Glyphs.UpdateGlyph
 @using Core.Application.Features.Glyphs.DeleteGlyph
 @using Core.Application.Features.Glyphs.AddGlyphTranslation
+@using Core.Application.Features.Glyphs.RemoveGlyphTranslation
 @using Core.Application.Features.Glyphs.GetGlyphs
 @using Core.Domain.Enums
 @using System.ComponentModel.DataAnnotations
@@ -254,13 +255,18 @@
                             @foreach (var t in _editGlyph!.Translations)
                             {
                                 <li class="list-group-item px-0">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <span class="fw-medium">@t.JapaneseWriting</span>
-                                            <span class="text-muted small ms-2">@t.RomajiWriting</span>
-                                            <div class="text-muted small">@t.Translation</div>
+<div class="d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <span class="fw-medium">@t.JapaneseWriting</span>
+                                                <span class="text-muted small ms-2">@t.RomajiWriting</span>
+                                                <div class="text-muted small">@t.Translation</div>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                                                    title="Delete translation"
+                                                    @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
-                                    </div>
                                 </li>
                             }
                         </ul>
@@ -446,6 +452,29 @@
 
         await LoadGlyphs();
         _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+    }
+
+    private async Task HandleRemoveTranslation(string japaneseWriting, string romajiWriting, string translation)
+    {
+        if (_editGlyphId == Guid.Empty) return;
+
+        try
+        {
+            await Sender.Send(new RemoveGlyphTranslationCommand(
+                _editGlyphId,
+                japaneseWriting,
+                romajiWriting,
+                translation));
+
+            await LoadGlyphs();
+            _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to delete translation: " + ex.Message;
+        }
     }
 
     private void OpenDeleteModal(Guid glyphId)

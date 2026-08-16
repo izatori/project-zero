@@ -91,6 +91,22 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Removes a translation example from the glyph that matches the given values.
+    /// </summary>
+    public void RemoveTranslation(string japaneseWriting, string romajiWriting, string translation)
+    {
+        var match = _translations.FirstOrDefault(t =>
+            t.JapaneseWriting == japaneseWriting &&
+            t.RomajiWriting == romajiWriting &&
+            t.Translation == translation);
+
+        if (match is not null)
+        {
+            _translations.Remove(match);
+        }
+    }
+
+    /// <summary>
     /// Marks the glyph as learned.
     /// </summary>
     public void MarkAsLearned()
