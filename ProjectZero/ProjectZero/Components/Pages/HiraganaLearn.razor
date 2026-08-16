@@ -1,5 +1,11 @@
 @page "/hiragana/learn"
 @rendermode InteractiveServer
+@using Core.Application.DTOs
+@using Core.Application.Features.Glyphs.GetGlyphs
+@using Core.Domain.Enums
+@using MediatR
+@inject ISender Sender
+@inject IJSRuntime JS
 
 <PageTitle>Learn Hiragana</PageTitle>
 
@@ -16,20 +22,160 @@
     </div>
 
     <div class="container px-0">
-        <div class="card shadow-sm border-0 text-center py-5">
-            <div class="card-body py-5">
-                <div class="mb-3">
-                    <i class="bi bi-mortarboard" style="font-size: 3rem; color: #adb5bd;"></i>
-                </div>
-                <h4 class="fw-semibold">Learning mode is coming soon</h4>
-                <p class="text-muted mb-4 col-md-6 mx-auto">
-                    Guided lessons, quizzes and practice exercises for Hiragana will be available here shortly.
-                    For now, head over to Discover to explore the characters or to Manage to add and edit them.
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-mortarboard me-2 text-primary"></i>Learn Hiragana Characters
+                </h5>
+                <p class="text-muted small mb-0 mt-1">
+                    @if (_cards.Count > 0)
+                    {
+                        <span>@_cards.Count translation cards ready. Flip each card to reveal the meaning.</span>
+                    }
+                    else
+                    {
+                        <span>No translation cards available yet.</span>
+                    }
                 </p>
-                <a class="btn btn-primary px-4" href="/hiragana">
-                    <i class="bi bi-compass me-2"></i>Go to Discover
-                </a>
+            </div>
+
+            <div class="card-body">
+                @if (_cards.Count == 0)
+                {
+                    <p class="text-muted text-center py-4 mb-0">
+                        No Hiragana translations have been added yet. Head over to Manage to add some.
+                    </p>
+                }
+                else if (!_started)
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-4 col-md-8 mx-auto">
+                            You'll be shown a series of randomized cards. Start learning to flip through the Hiragana
+                            characters and their meanings.
+                        </p>
+                        <button type="button" class="btn btn-primary btn-lg px-5" @onclick="StartLearning">
+                            <i class="bi bi-play-fill me-2"></i>Start Learning
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <button type="button" class="btn btn-outline-primary btn-lg"
+                                    title="Previous card"
+                                    disabled="@(_currentIndex == 0)"
+                                    @onclick="() => GoTo(_currentIndex - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+
+                            <div class="learning-card @(_flipped ? "is-flipped" : "")" @onclick="ToggleFlip">
+                                <div class="learning-card-inner">
+                                    <div class="learning-card-face learning-card-front">
+                                        <h1 class="learning-card-char" @ref="_charElement">@Current.JapaneseWriting</h1>
+                                        <p class="text-muted small mt-3 mb-0">Click to flip</p>
+                                    </div>
+                                    <div class="learning-card-face learning-card-back">
+                                        <img class="learning-card-image"
+                                             src="@(string.IsNullOrEmpty(Current.ImageFileName)
+                                                    ? "/images/glyphs/no-image-found.jpg"
+                                                    : $"/images/translations/{Current.ImageFileName}")"
+                                             alt="@Current.Translation" />
+                                        <div class="learning-card-translation">@Current.Translation</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary btn-lg"
+                                    title="Next card"
+                                    disabled="@(_currentIndex >= _cards.Count - 1)"
+                                    @onclick="() => GoTo(_currentIndex + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-4 d-flex flex-column align-items-center gap-2">
+                            <span class="badge text-bg-primary-subtle">Card @(_currentIndex + 1) of @_cards.Count</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Restart">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Restart
+                            </button>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    private List<LearningCardItem> _cards = new();
+    private bool _started;
+    private int _currentIndex;
+    private bool _flipped;
+
+    private ElementReference _charElement;
+
+    private LearningCardItem Current => _cards[_currentIndex];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var glyphs = await Sender.Send(new GetAllGlyphsQuery(GlyphType.Hiragana));
+
+        var cards = glyphs
+            .SelectMany(g => g.Translations)
+            .Where(t => !string.IsNullOrWhiteSpace(t.JapaneseWriting) && !string.IsNullOrWhiteSpace(t.Translation))
+            .Select(t => new LearningCardItem(t.JapaneseWriting, t.Translation, t.ImageFileName))
+            .ToList();
+
+        Shuffle(cards);
+        _cards = cards;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_started && _cards.Count > 0)
+        {
+            await JS.InvokeVoidAsync("fitTextToWidth", _charElement, 128, 16);
+        }
+    }
+
+    private void StartLearning()
+    {
+        _currentIndex = 0;
+        _flipped = false;
+        _started = true;
+    }
+
+    private void GoTo(int index)
+    {
+        if (index < 0 || index >= _cards.Count)
+        {
+            return;
+        }
+
+        _currentIndex = index;
+        _flipped = false;
+    }
+
+    private void Restart()
+    {
+        _currentIndex = 0;
+        _flipped = false;
+    }
+
+    private void ToggleFlip()
+    {
+        _flipped = !_flipped;
+    }
+
+    private static void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Shared.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
+
+    private record LearningCardItem(string JapaneseWriting, string Translation, string? ImageFileName);
+}
