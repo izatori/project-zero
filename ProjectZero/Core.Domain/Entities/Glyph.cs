@@ -107,6 +107,24 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Sets (or clears) the image of a translation that matches the given values.
+    /// </summary>
+    public void SetTranslationImage(string japaneseWriting, string romajiWriting, string translation, string? imageFileName)
+    {
+        var match = _translations.FirstOrDefault(t =>
+            t.JapaneseWriting == japaneseWriting &&
+            t.RomajiWriting == romajiWriting &&
+            t.Translation == translation);
+
+        if (match is null)
+        {
+            throw new KeyNotFoundException("Translation was not found.");
+        }
+
+        match.SetImageFileName(imageFileName);
+    }
+
+    /// <summary>
     /// Marks the glyph as learned.
     /// </summary>
     public void MarkAsLearned()
@@ -205,13 +223,21 @@ public class GlyphTranslation : ValueObject
 
     public string Translation { get; }
 
-    public string? ImageFileName { get; }
+    public string? ImageFileName { get; private set; }
 
     public override IEnumerable<object> GetEqualityComponents()
     {
         yield return JapaneseWriting;
         yield return RomajiWriting;
         yield return Translation;
+    }
+
+    /// <summary>
+    /// Sets or clears the image for this translation.
+    /// </summary>
+    public void SetImageFileName(string? imageFileName)
+    {
+        ImageFileName = imageFileName;
     }
 }
 

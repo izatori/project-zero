@@ -6,6 +6,7 @@
 @using Core.Application.Features.Glyphs.DeleteGlyph
 @using Core.Application.Features.Glyphs.AddGlyphTranslation
 @using Core.Application.Features.Glyphs.RemoveGlyphTranslation
+@using Core.Application.Features.Glyphs.UpdateGlyphTranslationImage
 @using Core.Application.Features.Glyphs.GetGlyphs
 @using Core.Domain.Enums
 @using System.ComponentModel.DataAnnotations
@@ -268,11 +269,26 @@
                                                 <div class="text-muted small">@t.Translation</div>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger ms-2"
-                                                title="Delete translation"
-                                                @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <div class="d-flex flex-column align-items-end gap-1 ms-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    title="Delete translation"
+                                                    @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <label class="btn btn-sm btn-outline-secondary mb-0" title="Upload image">
+                                                <i class="bi bi-upload"></i>
+                                                <InputFile class="d-none" accept="image/jpeg,image/png,image/webp"
+                                                           OnChange="(e) => OnExistingTranslationImageSelected(t.JapaneseWriting, t.RomajiWriting, t.Translation, e)" />
+                                            </label>
+                                            @if (!string.IsNullOrEmpty(t.ImageFileName))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                        title="Remove image"
+                                                        @onclick="() => RemoveTranslationImage(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            }
+                                        </div>
                                     </div>
                                 </li>
                             }
@@ -492,10 +508,18 @@
     private async Task OnTranslationImageSelected(InputFileChangeEventArgs e)
     {
         _translationImageName = "";
-        var file = e.File;
+        var fileName = await SaveUploadedImageAsync(e.File);
+        if (fileName is not null)
+        {
+            _translationImageName = fileName;
+        }
+    }
+
+    private async Task<string?> SaveUploadedImageAsync(IBrowserFile? file)
+    {
         if (file is null)
         {
-            return;
+            return null;
         }
 
         var ext = Path.GetExtension(file.Name);
@@ -507,7 +531,7 @@
             _showActionSuccess = true;
             _actionIsError = true;
             _actionSuccessMessage = "Image must be a .jpg, .jpeg, .png or .webp file.";
-            return;
+            return null;
         }
 
         var fileName = $"{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
@@ -518,13 +542,65 @@
         {
             await using var fs = new FileStream(Path.Combine(uploadDir, fileName), FileMode.Create);
             await file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024).CopyToAsync(fs);
-            _translationImageName = fileName;
+            return fileName;
         }
         catch (Exception ex)
         {
             _showActionSuccess = true;
             _actionIsError = true;
             _actionSuccessMessage = "Failed to save image: " + ex.Message;
+            return null;
+        }
+    }
+
+    private async Task OnExistingTranslationImageSelected(string japaneseWriting, string romajiWriting, string translation, InputFileChangeEventArgs e)
+    {
+        if (_editGlyphId == Guid.Empty) return;
+
+        var fileName = await SaveUploadedImageAsync(e.File);
+        if (fileName is null) return;
+
+        try
+        {
+            await Sender.Send(new UpdateGlyphTranslationImageCommand(
+                _editGlyphId,
+                japaneseWriting,
+                romajiWriting,
+                translation,
+                fileName));
+
+            await LoadGlyphs();
+            _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to update translation image: " + ex.Message;
+        }
+    }
+
+    private async Task RemoveTranslationImage(string japaneseWriting, string romajiWriting, string translation)
+    {
+        if (_editGlyphId == Guid.Empty) return;
+
+        try
+        {
+            await Sender.Send(new UpdateGlyphTranslationImageCommand(
+                _editGlyphId,
+                japaneseWriting,
+                romajiWriting,
+                translation,
+                null));
+
+            await LoadGlyphs();
+            _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);
+        }
+        catch (Exception ex)
+        {
+            _showActionSuccess = true;
+            _actionIsError = true;
+            _actionSuccessMessage = "Failed to remove translation image: " + ex.Message;
         }
     }
 
