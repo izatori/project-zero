@@ -308,11 +308,40 @@ pre {
 
 .learning-card-char {
     font-size: 8rem;
-    line-height: 1;
+    line-height: 1.1;
     text-align: center;
     margin: 0;
     max-width: 100%;
     white-space: nowrap;
+    font-family: "Yu Gothic", "YuGothic", Meiryo, "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+        "BIZ UDPGothic", system-ui, sans-serif;
+}
+
+.learning-romaji-hint {
+    margin-top: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 999px;
+    background: #e9ecef;
+    color: transparent;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 10px #adb5bd;
+    user-select: none;
+    cursor: help;
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.learning-romaji-hint:hover {
+    background: #f8f9fa;
+    color: #212529;
+    text-shadow: none;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
 }
 
 .learning-card-image {
@@ -328,6 +357,18 @@ pre {
     font-size: 1.5rem;
     font-weight: 600;
     text-align: center;
+}
+
+.btn-help {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1050;
 }
 
 /* Playground sub-page tiles */

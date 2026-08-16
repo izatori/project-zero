@@ -73,7 +73,9 @@
                                 <div class="learning-card-inner">
                                     <div class="learning-card-face learning-card-front">
                                         <h1 class="learning-card-char" @ref="_charElement">@Current.JapaneseWriting</h1>
-                                        <p class="text-muted small mt-3 mb-0">Click to flip</p>
+                                        <div class="learning-romaji-hint">
+                                            <span>@Current.RomajiWriting</span>
+                                        </div>
                                     </div>
                                     <div class="learning-card-face learning-card-back">
                                         <img class="learning-card-image"
@@ -107,11 +109,62 @@
     </div>
 </div>
 
+<button type="button" class="btn btn-help position-fixed bottom-0 end-0 m-4" @onclick="() => _showHelp = true"
+        title="How to use the app" aria-label="Help">
+    <i class="bi bi-question-lg"></i>
+</button>
+
+@if (_showHelp)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="bi bi-lightbulb me-2 text-primary"></i>How to use the app
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => _showHelp = false" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="bi bi-play-circle me-2 text-primary"></i>
+                            <strong>Start Learning</strong> — begins a session of randomized Hiragana cards.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-chevron-left me-2 text-muted"></i>
+                            <i class="bi bi-chevron-right me-2 text-muted"></i>
+                            <strong>Next / Previous</strong> — move through the cards using the arrow buttons.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-arrow-repeat me-2 text-secondary"></i>
+                            <strong>Reveal romaji</strong> — hover the gray pill below the character to see the romaji.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-arrow-repeat me-2 text-secondary"></i>
+                            <strong>Flip the card</strong> — click the card to see the image and meaning.
+                        </li>
+                        <li>
+                            <i class="bi bi-arrow-counterclockwise me-2 text-secondary"></i>
+                            <strong>Restart</strong> — jump back to the first card.
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showHelp = false">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     private List<LearningCardItem> _cards = new();
     private bool _started;
     private int _currentIndex;
     private bool _flipped;
+    private bool _showHelp;
 
     private ElementReference _charElement;
 
@@ -124,7 +177,7 @@
         var cards = glyphs
             .SelectMany(g => g.Translations)
             .Where(t => !string.IsNullOrWhiteSpace(t.JapaneseWriting) && !string.IsNullOrWhiteSpace(t.Translation))
-            .Select(t => new LearningCardItem(t.JapaneseWriting, t.Translation, t.ImageFileName))
+            .Select(t => new LearningCardItem(t.JapaneseWriting, t.RomajiWriting, t.Translation, t.ImageFileName))
             .ToList();
 
         Shuffle(cards);
@@ -177,5 +230,5 @@
         }
     }
 
-    private record LearningCardItem(string JapaneseWriting, string Translation, string? ImageFileName);
+    private record LearningCardItem(string JapaneseWriting, string RomajiWriting, string Translation, string? ImageFileName);
 }
