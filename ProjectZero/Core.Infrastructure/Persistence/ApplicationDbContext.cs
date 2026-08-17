@@ -13,7 +13,6 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    public DbSet<User> Users { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Glyph> Glyphs { get; set; } = null!;
 
@@ -21,20 +20,6 @@ public class ApplicationDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // User configuration
-        modelBuilder.Entity<User>(builder =>
-        {
-            builder.HasKey(u => u.Id);
-            builder.Property(u => u.Name).IsRequired().HasMaxLength(255);
-            builder.Property(u => u.Email).IsRequired().HasMaxLength(255);
-            builder.Property(u => u.CreatedAt).IsRequired();
-            builder.Property(u => u.UpdatedAt);
-            builder.Property(u => u.IsActive).IsRequired();
-
-            // Unique constraint on email
-            builder.HasIndex(u => u.Email).IsUnique();
-        });
-        
         // Product configuration
         modelBuilder.Entity<Product>(builder =>
         {

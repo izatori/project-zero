@@ -27,12 +27,12 @@ public class UnitOfWorkTests : IDisposable
     [Fact]
     public async Task SaveChangesAsync_PersistsAddedEntities()
     {
-        _context.Users.Add(User.Create("John Doe", "john@example.com"));
+        _context.Products.Add(Product.Create("Widget", "widget.jpg", 9.99, "A widget"));
 
         var affectedRows = await _unitOfWork.SaveChangesAsync(CancellationToken.None);
 
         Assert.Equal(1, affectedRows);
-        Assert.Equal(1, await _context.Users.CountAsync(CancellationToken.None));
+        Assert.Equal(1, await _context.Products.CountAsync(CancellationToken.None));
     }
 
     [Fact]

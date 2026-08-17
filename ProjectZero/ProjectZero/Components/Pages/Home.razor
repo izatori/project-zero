@@ -209,8 +209,8 @@ Core.Infrastructure   Core.Application
             <div class="card-body">
                 <h3 class="card-title fs-6"><i class="bi bi-box-seam me-2 text-primary"></i>Domain-Driven Design</h3>
                 <p class="card-text text-muted small">
-                    <code>User</code> is an <code>AggregateRoot</code> with a private constructor and a factory
-                    (<code>User.Create</code>). State changes raise domain events.
+                    <code>Product</code> is an <code>AggregateRoot</code> with a private constructor and a factory
+                    (<code>Product.Create</code>). State changes raise domain events.
                 </p>
             </div>
         </div>
@@ -220,8 +220,8 @@ Core.Infrastructure   Core.Application
             <div class="card-body">
                 <h3 class="card-title fs-6"><i class="bi bi-arrow-left-right me-2 text-primary"></i>CQRS</h3>
                 <p class="card-text text-muted small">
-                    Commands (<code>CreateUserCommand</code>) and queries (<code>GetUserQuery</code>) are separated into
-                    <code>Features/Users/...</code> folders, each with its own handler.
+                    Commands (<code>CreateProductCommand</code>) and queries (<code>GetProductsQuery</code>) are separated into
+                    <code>Features/Products/...</code> folders, each with its own handler.
                 </p>
             </div>
         </div>
@@ -242,7 +242,7 @@ Core.Infrastructure   Core.Application
             <div class="card-body">
                 <h3 class="card-title fs-6"><i class="bi bi-database me-2 text-primary"></i>Repository</h3>
                 <p class="card-text text-muted small">
-                    <code>IUserRepository</code> lives in Domain, <code>UserRepository</code> lives in Infrastructure.
+                    <code>IProductRepository</code> lives in Domain, <code>ProductRepository</code> lives in Infrastructure.
                     Domain is never coupled to EF Core.
                 </p>
             </div>
@@ -284,7 +284,7 @@ Core.Infrastructure   Core.Application
             <div class="card-body">
                 <h3 class="card-title fs-6"><i class="bi bi-arrow-repeat me-2 text-primary"></i>Factory method</h3>
                 <p class="card-text text-muted small">
-                    <code>User.Create(name, email)</code> encapsulates validation and construction instead of a public constructor.
+                    <code>Product.Create(name, fileName, price, description)</code> encapsulates validation and construction instead of a public constructor.
                 </p>
             </div>
         </div>
@@ -294,7 +294,7 @@ Core.Infrastructure   Core.Application
             <div class="card-body">
                 <h3 class="card-title fs-6"><i class="bi bi-shuffle me-2 text-primary"></i>DTO mapping</h3>
                 <p class="card-text text-muted small">
-                    <code>GetUserQueryHandler</code> maps the <code>User</code> entity to a <code>UserDTO</code>,
+                    <code>GetProductsQueryHandler</code> maps the <code>Product</code> entity to a <code>ProductDto</code>,
                     keeping domain models private to the core.
                 </p>
             </div>

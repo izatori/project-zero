@@ -1,9 +1,7 @@
 using Core.Domain.Abstractions;
 using Core.Domain.Repositories;
-using Core.Domain.Services;
 using Core.Infrastructure.Persistence;
 using Core.Infrastructure.Persistence.Repositories;
-using Core.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,16 +21,11 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>(options => { options.UseInMemoryDatabase("ProjectZero"); });
 
         // Register repositories
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IGlyphRepository, GlyphRepository>();
 
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        // Register domain services
-        services.AddScoped<IDeleteMeUserDomainService, DeleteMeUserDomainService>();
-        services.AddScoped<IDeleteMeEmailDomainService, DeleteMeEmailDomainService>();
 
         return services;
     }
@@ -51,16 +44,11 @@ public static class ServiceCollectionExtensions
         });
 
         // Register repositories
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IGlyphRepository, GlyphRepository>();
 
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        // Register domain services
-        services.AddScoped<IDeleteMeUserDomainService, DeleteMeUserDomainService>();
-        services.AddScoped<IDeleteMeEmailDomainService, DeleteMeEmailDomainService>();
 
         return services;
     }
