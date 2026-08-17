@@ -27,3 +27,7 @@ window.fitTextToWidth = function (element, maxSize, minSize) {
         element.style.fontSize = size + 'px';
     }
 };
+
+window.setLearningFocus = function (on) {
+    document.body.classList.toggle('learning-focus-active', !!on);
+};

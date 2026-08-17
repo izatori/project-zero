@@ -380,6 +380,120 @@ pre {
     font-weight: 500;
 }
 
+/* Focus (started) learning mode: full-screen, non-scrollable */
+
+body.learning-focus-active {
+    overflow: hidden;
+}
+
+.learning-focus {
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    overflow: hidden;
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+.learning-focus-nav {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    padding: 1rem 1rem 0;
+}
+
+.learning-focus-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: hidden;
+    padding: 0.5rem 1rem 1.5rem;
+}
+
+.learning-focus-body .learning-card-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: auto;
+}
+
+.learning-focus-body .learning-card {
+    max-width: min(440px, 78vh, 92vw);
+    height: min(540px, 60vh);
+    flex: 0 0 auto;
+}
+
+.learning-focus-body .learning-card-image {
+    max-height: 46vh;
+}
+
+.learning-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem 1rem;
+}
+
+.learning-empty-state img {
+    max-width: 260px;
+    width: 100%;
+    height: auto;
+    opacity: 0.9;
+}
+
+.learning-empty-state p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.learning-focus-body > .learning-empty-state {
+    margin: auto;
+}
+
+.learning-focus-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.learning-focus-return {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1050;
+}
+
+.learning-focus-filter {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.learning-focus-filter-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .btn-help {
     width: 56px;
     height: 56px;
