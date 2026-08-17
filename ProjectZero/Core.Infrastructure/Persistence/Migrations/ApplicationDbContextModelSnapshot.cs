@@ -22,6 +22,42 @@ namespace Core.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Core.Domain.Entities.Glyph", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Character")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<string>("ImageFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("IsLearned")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Romaji")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StrokeAnimationFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Glyphs");
+                });
+
             modelBuilder.Entity("Core.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -91,6 +127,49 @@ namespace Core.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Core.Domain.Entities.Glyph", b =>
+                {
+                    b.OwnsMany("Core.Domain.Entities.GlyphTranslation", "Translations", b1 =>
+                        {
+                            b1.Property<Guid>("GlyphId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("ImageFileName")
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)");
+
+                            b1.Property<string>("JapaneseWriting")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)");
+
+                            b1.Property<string>("RomajiWriting")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)");
+
+                            b1.Property<string>("Translation")
+                                .IsRequired()
+                                .HasMaxLength(1023)
+                                .HasColumnType("nvarchar(1023)");
+
+                            b1.HasKey("GlyphId", "Id");
+
+                            b1.ToTable("GlyphTranslation");
+
+                            b1.WithOwner()
+                                .HasForeignKey("GlyphId");
+                        });
+
+                    b.Navigation("Translations");
                 });
 #pragma warning restore 612, 618
         }

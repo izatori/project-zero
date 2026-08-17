@@ -1,0 +1,234 @@
+@page "/hiragana/learn"
+@rendermode InteractiveServer
+@using Core.Application.DTOs
+@using Core.Application.Features.Glyphs.GetGlyphs
+@using Core.Domain.Enums
+@using MediatR
+@inject ISender Sender
+@inject IJSRuntime JS
+
+<PageTitle>Learn Hiragana</PageTitle>
+
+<div class="playground-page py-4">
+    <HiraganaNav />
+    <div class="d-flex align-items-center mb-4 mt-2">
+        <div class="me-3 d-flex align-items-center justify-content-center default-page-icon">
+            <i class="bi bi-journal-bookmark p-3"></i>
+        </div>
+        <div>
+            <h1 class="mb-0 fw-bold">Learn</h1>
+            <p class="text-muted mb-0">Practice and study Hiragana in a structured way.</p>
+        </div>
+    </div>
+
+    <div class="container px-0">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0">
+                <h5 class="card-title fw-semibold mb-0">
+                    <i class="bi bi-mortarboard me-2 text-primary"></i>Learn Hiragana Characters
+                </h5>
+                <p class="text-muted small mb-0 mt-1">
+                    @if (_cards.Count > 0)
+                    {
+                        <span>@_cards.Count translation cards ready. Flip each card to reveal the meaning.</span>
+                    }
+                    else
+                    {
+                        <span>No translation cards available yet.</span>
+                    }
+                </p>
+            </div>
+
+            <div class="card-body">
+                @if (_cards.Count == 0)
+                {
+                    <p class="text-muted text-center py-4 mb-0">
+                        No Hiragana translations have been added yet. Head over to Manage to add some.
+                    </p>
+                }
+                else if (!_started)
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-4 col-md-8 mx-auto">
+                            You'll be shown a series of randomized cards. Start learning to flip through the Hiragana
+                            characters and their meanings.
+                        </p>
+                        <button type="button" class="btn btn-primary btn-lg px-5" @onclick="StartLearning">
+                            <i class="bi bi-play-fill me-2"></i>Start Learning
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <button type="button" class="btn btn-outline-primary btn-lg"
+                                    title="Previous card"
+                                    disabled="@(_currentIndex == 0)"
+                                    @onclick="() => GoTo(_currentIndex - 1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+
+                            <div class="learning-card @(_flipped ? "is-flipped" : "")" @onclick="ToggleFlip">
+                                <div class="learning-card-inner">
+                                    <div class="learning-card-face learning-card-front">
+                                        <h1 class="learning-card-char" @ref="_charElement">@Current.JapaneseWriting</h1>
+                                        <div class="learning-romaji-hint">
+                                            <span>@Current.RomajiWriting</span>
+                                        </div>
+                                    </div>
+                                    <div class="learning-card-face learning-card-back">
+                                        <img class="learning-card-image"
+                                             src="@(string.IsNullOrEmpty(Current.ImageFileName)
+                                                    ? "/images/glyphs/no-image-found.jpg"
+                                                    : $"/images/translations/{Current.ImageFileName}")"
+                                             alt="@Current.Translation" />
+                                        <div class="learning-card-translation">@Current.Translation</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary btn-lg"
+                                    title="Next card"
+                                    disabled="@(_currentIndex >= _cards.Count - 1)"
+                                    @onclick="() => GoTo(_currentIndex + 1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-4 d-flex flex-column align-items-center gap-2">
+                            <span class="badge text-bg-primary-subtle">Card @(_currentIndex + 1) of @_cards.Count</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Restart">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Restart
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" class="btn btn-help position-fixed bottom-0 end-0 m-4" @onclick="() => _showHelp = true"
+        title="How to use the app" aria-label="Help">
+    <i class="bi bi-question-lg"></i>
+</button>
+
+@if (_showHelp)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold">
+                        <i class="bi bi-lightbulb me-2 text-primary"></i>How to use the app
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => _showHelp = false" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="bi bi-play-circle me-2 text-primary"></i>
+                            <strong>Start Learning</strong> — begins a session of randomized Hiragana cards.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-chevron-left me-2 text-muted"></i>
+                            <i class="bi bi-chevron-right me-2 text-muted"></i>
+                            <strong>Next / Previous</strong> — move through the cards using the arrow buttons.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-arrow-repeat me-2 text-secondary"></i>
+                            <strong>Reveal romaji</strong> — hover the gray pill below the character to see the romaji.
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-arrow-repeat me-2 text-secondary"></i>
+                            <strong>Flip the card</strong> — click the card to see the image and meaning.
+                        </li>
+                        <li>
+                            <i class="bi bi-arrow-counterclockwise me-2 text-secondary"></i>
+                            <strong>Restart</strong> — jump back to the first card.
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => _showHelp = false">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    private List<LearningCardItem> _cards = new();
+    private bool _started;
+    private int _currentIndex;
+    private bool _flipped;
+    private bool _showHelp;
+
+    private ElementReference _charElement;
+
+    private LearningCardItem Current => _cards[_currentIndex];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var glyphs = await Sender.Send(new GetAllGlyphsQuery(GlyphType.Hiragana));
+
+        var cards = glyphs
+            .SelectMany(g => g.Translations)
+            .Where(t => !string.IsNullOrWhiteSpace(t.JapaneseWriting) && !string.IsNullOrWhiteSpace(t.Translation))
+            .Select(t => new LearningCardItem(t.JapaneseWriting, t.RomajiWriting, t.Translation, t.ImageFileName))
+            .ToList();
+
+        Shuffle(cards);
+        _cards = cards;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_started && _cards.Count > 0)
+        {
+            await JS.InvokeVoidAsync("fitTextToWidth", _charElement, 128, 16);
+        }
+    }
+
+    private void StartLearning()
+    {
+        _currentIndex = 0;
+        _flipped = false;
+        _started = true;
+    }
+
+    private void GoTo(int index)
+    {
+        if (index < 0 || index >= _cards.Count)
+        {
+            return;
+        }
+
+        _currentIndex = index;
+        _flipped = false;
+    }
+
+    private void Restart()
+    {
+        _currentIndex = 0;
+        _flipped = false;
+    }
+
+    private void ToggleFlip()
+    {
+        _flipped = !_flipped;
+    }
+
+    private static void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Shared.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
+
+    private record LearningCardItem(string JapaneseWriting, string RomajiWriting, string Translation, string? ImageFileName);
+}
