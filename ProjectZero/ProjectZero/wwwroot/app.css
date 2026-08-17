@@ -359,6 +359,27 @@ pre {
     text-align: center;
 }
 
+.learning-filter {
+    position: sticky;
+    top: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.75rem;
+}
+
+.learning-filter .list-group {
+    border-radius: 8px;
+}
+
+.learning-filter .list-group-item {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
 .btn-help {
     width: 56px;
     height: 56px;

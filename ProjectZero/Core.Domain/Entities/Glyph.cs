@@ -125,6 +125,31 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Sets the learned state of a translation that matches the given values.
+    /// </summary>
+    public void SetTranslationLearned(string japaneseWriting, string romajiWriting, string translation, bool isLearned)
+    {
+        var match = _translations.FirstOrDefault(t =>
+            t.JapaneseWriting == japaneseWriting &&
+            t.RomajiWriting == romajiWriting &&
+            t.Translation == translation);
+
+        if (match is null)
+        {
+            throw new KeyNotFoundException("Translation was not found.");
+        }
+
+        if (isLearned)
+        {
+            match.MarkAsLearned();
+        }
+        else
+        {
+            match.MarkAsNotLearned();
+        }
+    }
+
+    /// <summary>
     /// Marks the glyph as learned.
     /// </summary>
     public void MarkAsLearned()
@@ -144,7 +169,14 @@ public class Glyph : AggregateRoot<Guid>
     /// </summary>
     public void MarkAsNotLearned()
     {
+        if (!IsLearned)
+        {
+            return;
+        }
+    
         IsLearned = false;
+        
+        RaiseDomainEvent(new GlyphMarkedAsUnlearnedEvent(Id));
     }
 
     /// <summary>
@@ -215,6 +247,7 @@ public class GlyphTranslation : ValueObject
         RomajiWriting = romajiWriting;
         Translation = translation;
         ImageFileName = imageFileName;
+        IsLearned = false;
     }
 
     public string JapaneseWriting { get; }
@@ -224,6 +257,8 @@ public class GlyphTranslation : ValueObject
     public string Translation { get; }
 
     public string? ImageFileName { get; private set; }
+    
+    public bool IsLearned { get; private set; }
 
     public override IEnumerable<object> GetEqualityComponents()
     {
@@ -238,6 +273,16 @@ public class GlyphTranslation : ValueObject
     public void SetImageFileName(string? imageFileName)
     {
         ImageFileName = imageFileName;
+    }
+
+    public void MarkAsLearned()
+    {
+        IsLearned = true;
+    }
+
+    public void MarkAsNotLearned()
+    {
+        IsLearned = false;
     }
 }
 
@@ -270,6 +315,19 @@ public class GlyphCreatedEvent : DomainEvent
 public class GlyphMarkedLearnedEvent : DomainEvent
 {
     public GlyphMarkedLearnedEvent(Guid id)
+    {
+        GlyphId = id;
+    }
+
+    public Guid GlyphId { get; private set; }
+}
+
+/// <summary>
+/// Domain event raised when a glyph is marked as unlearned.
+/// </summary>
+public class GlyphMarkedAsUnlearnedEvent : DomainEvent
+{
+    public GlyphMarkedAsUnlearnedEvent(Guid id)
     {
         GlyphId = id;
     }
