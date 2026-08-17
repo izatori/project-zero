@@ -37,6 +37,7 @@ public class GetActiveGlyphsQueryHandler : IRequestHandler<GetActiveGlyphsQuery,
                 t.RomajiWriting,
                 t.Translation,
                 t.ImageFileName,
-                t.IsLearned)).ToList()));
+                t.IsLearned,
+                t.IsFavourite)).ToList()));
     }
 }

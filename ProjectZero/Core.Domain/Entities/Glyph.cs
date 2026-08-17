@@ -150,6 +150,31 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Sets the favourite state of a translation that matches the given values.
+    /// </summary>
+    public void SetTranslationFavourite(string japaneseWriting, string romajiWriting, string translation, bool isFavourite)
+    {
+        var match = _translations.FirstOrDefault(t =>
+            t.JapaneseWriting == japaneseWriting &&
+            t.RomajiWriting == romajiWriting &&
+            t.Translation == translation);
+
+        if (match is null)
+        {
+            throw new KeyNotFoundException("Translation was not found.");
+        }
+
+        if (isFavourite)
+        {
+            match.MarkAsFavourite();
+        }
+        else
+        {
+            match.MarkAsNotFavourite();
+        }
+    }
+
+    /// <summary>
     /// Marks the glyph as learned.
     /// </summary>
     public void MarkAsLearned()
@@ -248,6 +273,7 @@ public class GlyphTranslation : ValueObject
         Translation = translation;
         ImageFileName = imageFileName;
         IsLearned = false;
+        IsFavourite = false;
     }
 
     public string JapaneseWriting { get; }
@@ -259,6 +285,8 @@ public class GlyphTranslation : ValueObject
     public string? ImageFileName { get; private set; }
     
     public bool IsLearned { get; private set; }
+    
+    public bool IsFavourite { get; private set; }
 
     public override IEnumerable<object> GetEqualityComponents()
     {
@@ -283,6 +311,16 @@ public class GlyphTranslation : ValueObject
     public void MarkAsNotLearned()
     {
         IsLearned = false;
+    }
+
+    public void MarkAsFavourite()
+    {
+        IsFavourite = true;
+    }
+
+    public void MarkAsNotFavourite()
+    {
+        IsFavourite = false;
     }
 }
 

@@ -17,4 +17,5 @@ public record GlyphTranslationDto(
     string RomajiWriting,
     string Translation,
     string? ImageFileName,
-    bool IsLearned);
+    bool IsLearned,
+    bool IsFavourite);
