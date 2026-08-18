@@ -43,6 +43,7 @@ public class ApplicationDbContext : DbContext
             builder.Property(g => g.ImageFileName).IsRequired().HasMaxLength(255);
             builder.Property(g => g.StrokeAnimationFileName).HasMaxLength(255);
             builder.Property(g => g.IsLearned).IsRequired();
+            builder.Property(g => g.IsFavourite).IsRequired();
 
             builder.OwnsMany(g => g.Translations, t =>
             {

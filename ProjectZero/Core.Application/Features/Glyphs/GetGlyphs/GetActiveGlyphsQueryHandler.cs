@@ -32,6 +32,7 @@ public class GetActiveGlyphsQueryHandler : IRequestHandler<GetActiveGlyphsQuery,
             g.ImageFileName,
             g.StrokeAnimationFileName,
             g.IsLearned,
+            g.IsFavourite,
             g.Translations.Select(t => new GlyphTranslationDto(
                 t.JapaneseWriting,
                 t.RomajiWriting,

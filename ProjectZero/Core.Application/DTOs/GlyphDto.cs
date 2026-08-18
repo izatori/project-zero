@@ -10,6 +10,7 @@ public record GlyphDto(
     string ImageFileName,
     string? StrokeAnimationFileName,
     bool IsLearned,
+    bool IsFavourite,
     IReadOnlyCollection<GlyphTranslationDto> Translations);
 
 public record GlyphTranslationDto(

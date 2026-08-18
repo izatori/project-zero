@@ -21,6 +21,7 @@ public class Glyph : AggregateRoot<Guid>
         ImageFileName = imageFileName;
         StrokeAnimationFileName = strokeAnimationFileName;
         IsLearned = false;
+        IsFavourite = false;
     }
 
     public string Character { get; private set; }
@@ -34,6 +35,8 @@ public class Glyph : AggregateRoot<Guid>
     public string? StrokeAnimationFileName { get; private set; }
 
     public bool IsLearned { get; private set; }
+
+    public bool IsFavourite { get; private set; }
 
     public IReadOnlyCollection<GlyphTranslation> Translations => _translations.AsReadOnly();
 
@@ -205,6 +208,36 @@ public class Glyph : AggregateRoot<Guid>
     }
 
     /// <summary>
+    /// Marks the glyph as a favourite.
+    /// </summary>
+    public void MarkAsFavourite()
+    {
+        if (IsFavourite)
+        {
+            return;
+        }
+
+        IsFavourite = true;
+
+        RaiseDomainEvent(new GlyphMarkedFavouriteEvent(Id));
+    }
+
+    /// <summary>
+    /// Marks the glyph as not a favourite.
+    /// </summary>
+    public void MarkAsNotFavourite()
+    {
+        if (!IsFavourite)
+        {
+            return;
+        }
+
+        IsFavourite = false;
+
+        RaiseDomainEvent(new GlyphMarkedAsUnfavouriteEvent(Id));
+    }
+
+    /// <summary>
     /// Validates that the character consists of one or more Hiragana/Katakana characters
     /// (single characters such as あ or compound syllables such as きゃ).
     /// </summary>
@@ -366,6 +399,32 @@ public class GlyphMarkedLearnedEvent : DomainEvent
 public class GlyphMarkedAsUnlearnedEvent : DomainEvent
 {
     public GlyphMarkedAsUnlearnedEvent(Guid id)
+    {
+        GlyphId = id;
+    }
+
+    public Guid GlyphId { get; private set; }
+}
+
+/// <summary>
+/// Domain event raised when a glyph is marked as a favourite.
+/// </summary>
+public class GlyphMarkedFavouriteEvent : DomainEvent
+{
+    public GlyphMarkedFavouriteEvent(Guid id)
+    {
+        GlyphId = id;
+    }
+
+    public Guid GlyphId { get; private set; }
+}
+
+/// <summary>
+/// Domain event raised when a glyph is marked as not a favourite.
+/// </summary>
+public class GlyphMarkedAsUnfavouriteEvent : DomainEvent
+{
+    public GlyphMarkedAsUnfavouriteEvent(Guid id)
     {
         GlyphId = id;
     }
