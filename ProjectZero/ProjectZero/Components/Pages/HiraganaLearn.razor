@@ -101,12 +101,17 @@
                 </button>
             </div>
 
-            @* Progress badge and a Restart control that jumps back to the first card. *@
+            @* Progress badge plus Restart (back to card 1) and Reshuffle (back to card 1 in a new random order) controls. *@
             <div class="mt-4 d-flex flex-column align-items-center gap-2">
                 <span class="badge text-bg-primary-subtle">Card @(_currentIndex + 1) of @_cards.Count</span>
-                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Restart">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restart
-                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Restart">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Restart
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="Reshuffle">
+                        <i class="bi bi-shuffle me-1"></i>Reshuffle
+                    </button>
+                </div>
             </div>
 
             @* Learned and favourite toggles for the current card. Buttons change to reflect state. *@
@@ -439,6 +444,14 @@ else
     // Jumps back to the first card.
     private void Restart()
     {
+        _currentIndex = 0;
+        _flipped = false;
+    }
+
+    // Restarts the session and reshuffles the deck into a new random order.
+    private void Reshuffle()
+    {
+        Shuffle(_cards);
         _currentIndex = 0;
         _flipped = false;
     }
