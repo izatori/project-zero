@@ -423,6 +423,13 @@ body.learning-focus-active {
     margin: auto;
 }
 
+.learning-focus-body .learning-card-row .btn:disabled {
+    color: #6c757d;
+    border-color: #ced4da;
+    background-color: transparent;
+    opacity: 0.55;
+}
+
 .learning-focus-body .learning-card {
     max-width: min(440px, 78vh, 92vw);
     height: min(540px, 60vh);
