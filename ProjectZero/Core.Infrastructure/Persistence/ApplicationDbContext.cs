@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Glyph> Glyphs { get; set; } = null!;
+    public DbSet<Translation> Translations { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,15 +45,24 @@ public class ApplicationDbContext : DbContext
             builder.Property(g => g.StrokeAnimationFileName).HasMaxLength(255);
             builder.Property(g => g.IsLearned).IsRequired();
             builder.Property(g => g.IsFavourite).IsRequired();
+        });
 
-            builder.OwnsMany(g => g.Translations, t =>
-            {
-                t.WithOwner().HasForeignKey("GlyphId");
-                t.Property(x => x.JapaneseWriting).IsRequired().HasMaxLength(255);
-                t.Property(x => x.RomajiWriting).IsRequired().HasMaxLength(255);
-                t.Property(x => x.Translation).IsRequired().HasMaxLength(1023);
-                t.Property(x => x.ImageFileName).HasMaxLength(255);
-            });
+        // Translation configuration
+        modelBuilder.Entity<Translation>(builder =>
+        {
+            builder.HasKey(t => t.Id);
+            builder.Property(t => t.GlyphId);
+            builder.Property(t => t.JapaneseWriting).IsRequired().HasMaxLength(255);
+            builder.Property(t => t.RomajiWriting).IsRequired().HasMaxLength(255);
+            builder.Property(t => t.English).IsRequired().HasMaxLength(1023).HasColumnName("Translation");
+            builder.Property(t => t.ImageFileName).HasMaxLength(255);
+            builder.Property(t => t.IsLearned).IsRequired();
+            builder.Property(t => t.IsFavourite).IsRequired();
+
+            builder.HasOne<Glyph>()
+                .WithMany()
+                .HasForeignKey(t => t.GlyphId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

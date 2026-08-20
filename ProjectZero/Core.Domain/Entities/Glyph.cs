@@ -11,8 +11,6 @@ namespace Core.Domain.Entities;
 /// </summary>
 public class Glyph : AggregateRoot<Guid>
 {
-    private readonly List<GlyphTranslation> _translations = [];
-
     private Glyph(Guid id, string character, string romaji, GlyphType type, string imageFileName, string? strokeAnimationFileName) : base(id)
     {
         Character = character;
@@ -37,8 +35,6 @@ public class Glyph : AggregateRoot<Guid>
     public bool IsLearned { get; private set; }
 
     public bool IsFavourite { get; private set; }
-
-    public IReadOnlyCollection<GlyphTranslation> Translations => _translations.AsReadOnly();
 
     /// <summary>
     /// Factory method to create a new Glyph.
@@ -74,107 +70,6 @@ public class Glyph : AggregateRoot<Guid>
         Type = type;
         ImageFileName = imageFileName;
         StrokeAnimationFileName = strokeAnimationFileName;
-    }
-
-    /// <summary>
-    /// Adds a translation example to the glyph.
-    /// </summary>
-    public void AddTranslation(string japaneseWriting, string romajiWriting, string translation, string? imageFileName = null)
-    {
-        if (string.IsNullOrWhiteSpace(japaneseWriting))
-            throw new ArgumentException("Japanese writing cannot be empty", nameof(japaneseWriting));
-
-        if (string.IsNullOrWhiteSpace(romajiWriting))
-            throw new ArgumentException("Romaji writing cannot be empty", nameof(romajiWriting));
-
-        if (string.IsNullOrWhiteSpace(translation))
-            throw new ArgumentException("Translation cannot be empty", nameof(translation));
-
-        _translations.Add(new GlyphTranslation(japaneseWriting, romajiWriting, translation, imageFileName));
-    }
-
-    /// <summary>
-    /// Removes a translation example from the glyph that matches the given values.
-    /// </summary>
-    public void RemoveTranslation(string japaneseWriting, string romajiWriting, string translation)
-    {
-        var match = _translations.FirstOrDefault(t =>
-            t.JapaneseWriting == japaneseWriting &&
-            t.RomajiWriting == romajiWriting &&
-            t.Translation == translation);
-
-        if (match is not null)
-        {
-            _translations.Remove(match);
-        }
-    }
-
-    /// <summary>
-    /// Sets (or clears) the image of a translation that matches the given values.
-    /// </summary>
-    public void SetTranslationImage(string japaneseWriting, string romajiWriting, string translation, string? imageFileName)
-    {
-        var match = _translations.FirstOrDefault(t =>
-            t.JapaneseWriting == japaneseWriting &&
-            t.RomajiWriting == romajiWriting &&
-            t.Translation == translation);
-
-        if (match is null)
-        {
-            throw new KeyNotFoundException("Translation was not found.");
-        }
-
-        match.SetImageFileName(imageFileName);
-    }
-
-    /// <summary>
-    /// Sets the learned state of a translation that matches the given values.
-    /// </summary>
-    public void SetTranslationLearned(string japaneseWriting, string romajiWriting, string translation, bool isLearned)
-    {
-        var match = _translations.FirstOrDefault(t =>
-            t.JapaneseWriting == japaneseWriting &&
-            t.RomajiWriting == romajiWriting &&
-            t.Translation == translation);
-
-        if (match is null)
-        {
-            throw new KeyNotFoundException("Translation was not found.");
-        }
-
-        if (isLearned)
-        {
-            match.MarkAsLearned();
-        }
-        else
-        {
-            match.MarkAsNotLearned();
-        }
-    }
-
-    /// <summary>
-    /// Sets the favourite state of a translation that matches the given values.
-    /// </summary>
-    public void SetTranslationFavourite(string japaneseWriting, string romajiWriting, string translation, bool isFavourite)
-    {
-        var match = _translations.FirstOrDefault(t =>
-            t.JapaneseWriting == japaneseWriting &&
-            t.RomajiWriting == romajiWriting &&
-            t.Translation == translation);
-
-        if (match is null)
-        {
-            throw new KeyNotFoundException("Translation was not found.");
-        }
-
-        if (isFavourite)
-        {
-            match.MarkAsFavourite();
-        }
-        else
-        {
-            match.MarkAsNotFavourite();
-        }
     }
 
     /// <summary>
@@ -291,69 +186,6 @@ public class Glyph : AggregateRoot<Guid>
 
         if (!Regex.IsMatch(strokeAnimationFileName, @"^[a-zA-Z0-9_-]+\.gif$", RegexOptions.IgnoreCase))
             throw new ArgumentException("Stroke animation file name must only contain letters, numbers, - and _ followed by .gif", nameof(strokeAnimationFileName));
-    }
-}
-
-/// <summary>
-/// Value object representing a translation example for a glyph.
-/// </summary>
-public class GlyphTranslation : ValueObject
-{
-    public GlyphTranslation(string japaneseWriting, string romajiWriting, string translation, string? imageFileName = null)
-    {
-        JapaneseWriting = japaneseWriting;
-        RomajiWriting = romajiWriting;
-        Translation = translation;
-        ImageFileName = imageFileName;
-        IsLearned = false;
-        IsFavourite = false;
-    }
-
-    public string JapaneseWriting { get; }
-
-    public string RomajiWriting { get; }
-
-    public string Translation { get; }
-
-    public string? ImageFileName { get; private set; }
-    
-    public bool IsLearned { get; private set; }
-    
-    public bool IsFavourite { get; private set; }
-
-    public override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return JapaneseWriting;
-        yield return RomajiWriting;
-        yield return Translation;
-    }
-
-    /// <summary>
-    /// Sets or clears the image for this translation.
-    /// </summary>
-    public void SetImageFileName(string? imageFileName)
-    {
-        ImageFileName = imageFileName;
-    }
-
-    public void MarkAsLearned()
-    {
-        IsLearned = true;
-    }
-
-    public void MarkAsNotLearned()
-    {
-        IsLearned = false;
-    }
-
-    public void MarkAsFavourite()
-    {
-        IsFavourite = true;
-    }
-
-    public void MarkAsNotFavourite()
-    {
-        IsFavourite = false;
     }
 }
 

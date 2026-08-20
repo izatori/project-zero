@@ -4,9 +4,9 @@
 @using Core.Application.Features.Glyphs.CreateGlyph
 @using Core.Application.Features.Glyphs.UpdateGlyph
 @using Core.Application.Features.Glyphs.DeleteGlyph
-@using Core.Application.Features.Glyphs.AddGlyphTranslation
-@using Core.Application.Features.Glyphs.RemoveGlyphTranslation
-@using Core.Application.Features.Glyphs.UpdateGlyphTranslationImage
+@using Core.Application.Features.Translations.AddTranslation
+@using Core.Application.Features.Translations.RemoveTranslation
+@using Core.Application.Features.Translations.UpdateTranslationImage
 @using Core.Application.Features.Glyphs.GetGlyphs
 @using Core.Domain.Enums
 @using System.ComponentModel.DataAnnotations
@@ -272,19 +272,19 @@
                                         <div class="d-flex flex-column align-items-end gap-1 ms-2">
                                             <button type="button" class="btn btn-sm btn-outline-danger"
                                                     title="Delete translation"
-                                                    @onclick="() => HandleRemoveTranslation(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                                    @onclick="() => HandleRemoveTranslation(t.Id)">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                             <label class="btn btn-sm btn-outline-secondary mb-0" title="Upload image">
                                                 <i class="bi bi-upload"></i>
                                                 <InputFile class="d-none" accept="image/jpeg,image/png,image/webp"
-                                                           OnChange="(e) => OnExistingTranslationImageSelected(t.JapaneseWriting, t.RomajiWriting, t.Translation, e)" />
+                                                           OnChange="(e) => OnExistingTranslationImageSelected(t.Id, e)" />
                                             </label>
                                             @if (!string.IsNullOrEmpty(t.ImageFileName))
                                             {
                                                 <button type="button" class="btn btn-sm btn-outline-secondary"
                                                         title="Remove image"
-                                                        @onclick="() => RemoveTranslationImage(t.JapaneseWriting, t.RomajiWriting, t.Translation)">
+                                                        @onclick="() => RemoveTranslationImage(t.Id)">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
                                             }
@@ -484,7 +484,7 @@
 
         try
         {
-            await Sender.Send(new AddGlyphTranslationCommand(
+            await Sender.Send(new AddTranslationCommand(
                 _editGlyphId,
                 TranslationModel.JapaneseWriting,
                 TranslationModel.RomajiWriting,
@@ -553,7 +553,7 @@
         }
     }
 
-    private async Task OnExistingTranslationImageSelected(string japaneseWriting, string romajiWriting, string translation, InputFileChangeEventArgs e)
+    private async Task OnExistingTranslationImageSelected(Guid translationId, InputFileChangeEventArgs e)
     {
         if (_editGlyphId == Guid.Empty) return;
 
@@ -562,11 +562,8 @@
 
         try
         {
-            await Sender.Send(new UpdateGlyphTranslationImageCommand(
-                _editGlyphId,
-                japaneseWriting,
-                romajiWriting,
-                translation,
+            await Sender.Send(new UpdateTranslationImageCommand(
+                translationId,
                 fileName));
 
             await LoadGlyphs();
@@ -580,17 +577,14 @@
         }
     }
 
-    private async Task RemoveTranslationImage(string japaneseWriting, string romajiWriting, string translation)
+    private async Task RemoveTranslationImage(Guid translationId)
     {
         if (_editGlyphId == Guid.Empty) return;
 
         try
         {
-            await Sender.Send(new UpdateGlyphTranslationImageCommand(
-                _editGlyphId,
-                japaneseWriting,
-                romajiWriting,
-                translation,
+            await Sender.Send(new UpdateTranslationImageCommand(
+                translationId,
                 null));
 
             await LoadGlyphs();
@@ -604,17 +598,13 @@
         }
     }
 
-    private async Task HandleRemoveTranslation(string japaneseWriting, string romajiWriting, string translation)
+    private async Task HandleRemoveTranslation(Guid translationId)
     {
         if (_editGlyphId == Guid.Empty) return;
 
         try
         {
-            await Sender.Send(new RemoveGlyphTranslationCommand(
-                _editGlyphId,
-                japaneseWriting,
-                romajiWriting,
-                translation));
+            await Sender.Send(new RemoveTranslationCommand(translationId));
 
             await LoadGlyphs();
             _editGlyph = _glyphs.FirstOrDefault(g => g.Id == _editGlyphId);

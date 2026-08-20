@@ -1,8 +1,8 @@
 using MediatR;
 
-namespace Core.Application.Features.Glyphs.AddGlyphTranslation;
+namespace Core.Application.Features.Translations.AddTranslation;
 
-public record AddGlyphTranslationCommand(
+public record AddTranslationCommand(
     Guid GlyphId,
     string JapaneseWriting,
     string RomajiWriting,

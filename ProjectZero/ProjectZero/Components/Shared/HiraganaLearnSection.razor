@@ -1,8 +1,8 @@
 @using Core.Application.DTOs
 @using Core.Application.Features.Glyphs.SetGlyphLearned
 @using Core.Application.Features.Glyphs.SetGlyphFavourite
-@using Core.Application.Features.Glyphs.SetGlyphTranslationLearned
-@using Core.Application.Features.Glyphs.SetGlyphTranslationFavourite
+@using Core.Application.Features.Translations.SetTranslationLearned
+@using Core.Application.Features.Translations.SetTranslationFavourite
 @using MediatR
 @inject ISender Sender
 @inject IJSRuntime JS
@@ -314,6 +314,7 @@
     // Immutable view model for one learning card.
     private record LearningCardItem(
         Guid GlyphId,
+        Guid? TranslationId,
         bool IsLearned,
         bool IsFavourite,
         string JapaneseWriting,
@@ -324,7 +325,7 @@
         string GlyphImageFileName,
         string? GlyphAnimationFileName,
         string Romaji,
-        IReadOnlyList<GlyphTranslationDto> Translations);
+        IReadOnlyList<TranslationDto> Translations);
 
     // Rebuilds the deck (glyph-level or translation-level depending on mode) from the glyphs loaded by the page.
     // The page loads glyphs asynchronously after the initial render, so rebuild whenever the Glyphs reference changes.
@@ -343,6 +344,7 @@
         {
             _allCards = Glyphs.Select(g => new LearningCardItem(
                 g.Id,
+                null,
                 g.IsLearned,
                 g.IsFavourite,
                 "",
@@ -362,6 +364,7 @@
                 .Where(x => !string.IsNullOrWhiteSpace(x.Translation.JapaneseWriting) && !string.IsNullOrWhiteSpace(x.Translation.Translation))
                 .Select(x => new LearningCardItem(
                     x.GlyphId,
+                    x.Translation.Id,
                     x.Translation.IsLearned,
                     x.Translation.IsFavourite,
                     x.Translation.JapaneseWriting,
@@ -372,7 +375,7 @@
                     "",
                     null,
                     "",
-                    Array.Empty<GlyphTranslationDto>())).ToList();
+                    Array.Empty<TranslationDto>())).ToList();
         }
 
         ApplyFilter();
@@ -482,11 +485,8 @@
             }
             else
             {
-                await Sender.Send(new SetGlyphTranslationLearnedCommand(
-                    card.GlyphId,
-                    card.JapaneseWriting,
-                    card.RomajiWriting,
-                    card.Translation,
+                await Sender.Send(new SetTranslationLearnedCommand(
+                    card.TranslationId!.Value,
                     markedLearned));
             }
 
@@ -545,11 +545,8 @@
             }
             else
             {
-                await Sender.Send(new SetGlyphTranslationFavouriteCommand(
-                    card.GlyphId,
-                    card.JapaneseWriting,
-                    card.RomajiWriting,
-                    card.Translation,
+                await Sender.Send(new SetTranslationFavouriteCommand(
+                    card.TranslationId!.Value,
                     newValue));
             }
 
@@ -597,7 +594,7 @@
         };
     }
 
-    // Compares two cards. In glyph mode cards are unique per glyph; in words mode the three text fields disambiguate.
+    // Compares two cards. In glyph mode cards are unique per glyph; in words mode the translation id disambiguates.
     private static bool SameCard(LearningCardItem a, LearningCardItem b)
     {
         if (a.GlyphId != b.GlyphId)
@@ -605,14 +602,12 @@
             return false;
         }
 
-        if (a.Translations.Count == 0 || b.Translations.Count == 0)
+        if (a.TranslationId is not null && b.TranslationId is not null)
         {
-            return a.JapaneseWriting == b.JapaneseWriting &&
-                   a.RomajiWriting == b.RomajiWriting &&
-                   a.Translation == b.Translation;
+            return a.TranslationId == b.TranslationId;
         }
 
-        return true;
+        return a.TranslationId is null && b.TranslationId is null;
     }
 
     // Fisher-Yates shuffle, used to randomize the deck order.

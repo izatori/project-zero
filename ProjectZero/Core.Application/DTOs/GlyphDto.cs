@@ -11,9 +11,11 @@ public record GlyphDto(
     string? StrokeAnimationFileName,
     bool IsLearned,
     bool IsFavourite,
-    IReadOnlyCollection<GlyphTranslationDto> Translations);
+    IReadOnlyCollection<TranslationDto> Translations);
 
-public record GlyphTranslationDto(
+public record TranslationDto(
+    Guid Id,
+    Guid? GlyphId,
     string JapaneseWriting,
     string RomajiWriting,
     string Translation,

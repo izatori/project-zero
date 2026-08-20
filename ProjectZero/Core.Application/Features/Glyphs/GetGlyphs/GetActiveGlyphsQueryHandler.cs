@@ -11,10 +11,12 @@ namespace Core.Application.Features.Glyphs.GetGlyphs;
 public class GetActiveGlyphsQueryHandler : IRequestHandler<GetActiveGlyphsQuery, IEnumerable<GlyphDto>>
 {
     private readonly IGlyphRepository _glyphRepository;
+    private readonly ITranslationRepository _translationRepository;
 
-    public GetActiveGlyphsQueryHandler(IGlyphRepository glyphRepository)
+    public GetActiveGlyphsQueryHandler(IGlyphRepository glyphRepository, ITranslationRepository translationRepository)
     {
         _glyphRepository = glyphRepository ?? throw new ArgumentNullException(nameof(glyphRepository));
+        _translationRepository = translationRepository ?? throw new ArgumentNullException(nameof(translationRepository));
     }
 
     /// <summary>
@@ -23,6 +25,9 @@ public class GetActiveGlyphsQueryHandler : IRequestHandler<GetActiveGlyphsQuery,
     public async Task<IEnumerable<GlyphDto>> Handle(GetActiveGlyphsQuery query, CancellationToken cancellationToken = default)
     {
         var glyphs = await _glyphRepository.GetActiveByTypeAsync(query.GlyphType, cancellationToken);
+
+        var translations = await _translationRepository.GetByGlyphIdsAsync(glyphs.Select(g => g.Id), cancellationToken);
+        var translationsByGlyph = translations.ToLookup(t => t.GlyphId!.Value);
 
         return glyphs.Select(g => new GlyphDto(
             g.Id,
@@ -33,10 +38,12 @@ public class GetActiveGlyphsQueryHandler : IRequestHandler<GetActiveGlyphsQuery,
             g.StrokeAnimationFileName,
             g.IsLearned,
             g.IsFavourite,
-            g.Translations.Select(t => new GlyphTranslationDto(
+            translationsByGlyph[g.Id].Select(t => new TranslationDto(
+                t.Id,
+                t.GlyphId,
                 t.JapaneseWriting,
                 t.RomajiWriting,
-                t.Translation,
+                t.English,
                 t.ImageFileName,
                 t.IsLearned,
                 t.IsFavourite)).ToList()));
