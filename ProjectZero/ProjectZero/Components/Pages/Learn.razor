@@ -14,7 +14,7 @@
 
 @* Pre-start view: page header, then the Basic Hiragana and Hiragana words sections. *@
 <div class="playground-page py-4">
-    <HiraganaNav />
+    <GlyphNav />
     <div class="d-flex align-items-center mb-4 mt-2">
         <div class="me-3 d-flex align-items-center justify-content-center default-page-icon">
             <i class="bi bi-journal-bookmark p-3"></i>
@@ -27,14 +27,14 @@
 
     <div class="container px-0">
         @* Basic Hiragana section: one card per glyph (image + words). *@
-        <HiraganaLearnSection Title="Basic Hiragana"
+        <LearningSection Title="Basic Hiragana"
                               IconClass="bi-grid"
                               IsGlyphMode="true"
                               Glyphs="@_glyphs"
                               FocusChanged="OnFocusChanged" />
 
         @* Hiragana words section: one card per translation. *@
-        <HiraganaLearnSection Title="Hiragana words"
+        <LearningSection Title="Hiragana words"
                               IconClass="bi-journal-text"
                               IsGlyphMode="false"
                               Glyphs="@_glyphs"
