@@ -12,13 +12,3 @@ public record GlyphDto(
     bool IsLearned,
     bool IsFavourite,
     IReadOnlyCollection<TranslationDto> Translations);
-
-public record TranslationDto(
-    Guid Id,
-    Guid? GlyphId,
-    string JapaneseWriting,
-    string RomajiWriting,
-    string Translation,
-    string? ImageFileName,
-    bool IsLearned,
-    bool IsFavourite);
